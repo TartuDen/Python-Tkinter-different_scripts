@@ -24,8 +24,11 @@ class Calc:
 
 		#_________________________________
 		#function for numbers
+		self.i=0
 		def callback(event):
-			print(event)
+			self.i+=1
+			self.text.insert('1.%d'%i,event)
+			
 
 
 
