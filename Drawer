@@ -1,0 +1,108 @@
+from tkinter import*
+from tkinter import ttk
+
+
+class DrawerL:
+    def __init__(self, master):
+        frameTop = Frame(master)
+        frameTop.pack()
+
+        frameBottom = Frame(master)
+        frameBottom.pack()
+
+        # FORMS__________________________
+        labelForms = Label(frameTop)
+        labelForms.grid(row=1, column=0)
+
+        label_name_form = Label(frameTop, text='FORMS')
+        label_name_form.grid(row=0, column=0)
+
+        def callback_combobox(event):
+            if c_box_forms.get() == 'Pen':
+                def click1(event):
+                    global prev
+                    prev = event
+
+                def click2(event):
+                    global prev
+                    canvas.create_line(prev.x, prev.y, event.x, event.y, width=4)
+                    prev = event
+                canvas.bind('<ButtonPress-1>', click1)
+                canvas.bind('<B1-Motion>', click2)
+
+            elif c_box_forms.get() == 'Line':
+                def click1(event):
+                    global prev
+                    prev = event
+
+                def click2(event):
+                    global prev
+                    canvas.create_line(prev.x, prev.y, event.x, event.y, width=4)
+                    prev = event
+
+                canvas.bind('<ButtonPress-1>', click1)
+                canvas.bind('<ButtonRelease-1>', click2)
+
+            elif c_box_forms.get() == 'Oval':
+                def click1(event):
+                    global prev
+                    prev = event
+
+                def click2(event):
+                    global prev
+                    canvas.create_oval(prev.x, prev.y, event.x, event.y, width=4)
+                    prev = event
+
+                canvas.bind('<ButtonPress-1>', click1)
+                canvas.bind('<ButtonRelease-1>', click2)
+
+            elif c_box_forms.get() == 'Rectangle':
+                def click1(event):
+                    global prev
+                    prev = event
+
+                def click2(event):
+                    global prev
+                    canvas.create_rectangle(prev.x, prev.y, event.x, event.y, width=4)
+                    prev = event
+
+                canvas.bind('<ButtonPress-1>', click1)
+                canvas.bind('<ButtonRelease-1>', click2)
+
+        forms_ = StringVar()
+        c_box_forms = ttk.Combobox(labelForms, textvariable=forms_)
+        c_box_forms.grid(row=0, column=0)
+        c_box_forms.config(value=('Pen', 'Line', 'Oval', 'Rectangle'))
+        c_box_forms.bind('<<ComboboxSelected>>', callback_combobox)
+
+        #SPINBOX size_______________________________
+        size_= StringVar()
+        s_box_size = ttk.Spinbox(labelForms, textvariable=forms_)
+        s_box_size.grid(row=0, column=0)
+        s_box_size.config(value=('Pen', 'Line', 'Oval', 'Rectangle'))
+        s_box_size.bind('<<ComboboxSelected>>', callback_combobox)
+
+        # CANVAS_____________________________
+        canvas = Canvas(frameBottom, width=800, height=700, background='azure')
+        canvas.pack(fill=BOTH, expand=True)
+
+        def Esc(self):
+            master.destroy()
+
+        master.bind('<Escape>', lambda e: Esc(self))
+
+        # CLEAR_________________________________
+        def clear(event):
+            canvas.delete('all')
+
+        master.bind('<KeyPress-Delete>', lambda e: clear(self))
+
+
+def main():
+
+    root = Tk()
+    a = DrawerL(root)
+    root.mainloop()
+
+
+main()
