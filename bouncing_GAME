@@ -1,0 +1,44 @@
+from tkinter import*
+from tkinter import ttk
+import random
+
+
+class Game:
+    def __init__(self, master):
+        master.geometry('800x700+700+90')
+        self.button = Button(master, text='Start')
+        self.button.pack()
+        self.canvas = Canvas(master, bg='lemon chiffon')
+        self.canvas.pack(fill=BOTH, expand=True)
+
+        self.line = self.canvas.create_line(250, 250, 330, 250, width=7)
+
+        def moving(event):
+            self.canvas.coords(self.line, event.x, event.y, event.x + 80, event.y)
+        self.canvas.bind('<Motion>', moving)
+
+        def esc(self):
+            master.destroy()
+
+        master.bind('<Escape>', esc)
+
+        self.oval = self.canvas.create_oval(250, 250, 270, 270, fill='green')
+
+        def ball(self):
+            self.x_rand = random.randint(1, 450)
+            self.y_rand = random.randint(1, 450)
+            print(x_rand, y_rand)
+            self.oval.coord(self.x_rand, self.y_rand)
+            self.canvas.after(500, ball(self))
+
+        self.canvas.bind('<Return>', lambda: ball)
+
+
+def main():
+    root = Tk()
+    a = Game(root)
+    root.mainloop()
+
+
+if __name__ == '__main__':
+    main()
