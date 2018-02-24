@@ -1,0 +1,77 @@
+"""
+Craps is a dice game played at many casinos. A player rolls a pair of normal six-sided dice. If
+the initial roll is 2, 3, or 12, the player loses. If the roll is 7 or 11, the player wins. Any other
+initial roll causes the player to “roll for point.” That is, the player keeps rolling the dice until
+either rolling a 7 or re-rolling the value of the initial roll. If the player re-rolls the initial value
+before rolling a 7, it’s a win. Rolling a 7 first is a loss.
+Write a program to simulate multiple games of craps and estimate the probability that the
+player wins. For example, if the player wins 249 out of 500 games, then the estimated
+probability of winning is 249/500 = 0.498
+"""
+
+from tkinter import *
+from tkinter import ttk
+import random
+
+
+def main():
+    root = Tk()
+    root.geometry('400x300+700+200')
+    root.config(background='bisque2')
+    info_label = Label(root, text='Lets play some dice!', background='Darkgoldenrod3', font=('Arial', 16))
+    info_label.place(relx=0, x=1, rely=0.05, width=397, height=70)
+    label_cube1 = Label(root, background='peach puff4')
+    label_cube1.place(relx=0.3, rely=0.3, width=60, height=60)
+    label_cube2 = Label(root, background='peach puff4')
+    label_cube2.place(relx=0.5, rely=0.3, width=60, height=60)
+    global count_loos
+    global count_win
+    count_loos = 0
+    count_win = 0
+
+    def callback():
+        global count_win
+        global count_loos
+        rnd1 = random.randint(0, 7)
+        rnd2 = random.randint(0, 7)
+        label_cube1.config(text='%d' % rnd1, font=('Arial', 20))
+        label_cube2.config(text='%d' % rnd2, font=('Arial', 20))
+        rnd = rnd1 + rnd2
+        if rnd == 2 or rnd == 3 or rnd == 12:
+            count_loos += 1
+            info_label.config(text='%d -- Sorry, you loose!\nYour wins: %d\nYour looses: %d' % (rnd, count_win, count_loos))
+        elif rnd == 7 or rnd == 11:
+            count_win += 1
+            info_label.config(text='%d -- Congrats!!! You winn!\nYour wins: %d\nYour looses: %d' % (rnd, count_win, count_loos))
+        else:
+            info_label.config(text='%d -- Roll for point!\nYour wins: %d\nYour looses: %d' % (rnd, count_win, count_loos))
+            global remember_rnd
+            remember_rnd = rnd
+
+    def roll_for_p():
+        global count_win
+        global count_loos
+        global remember_rnd
+        rnd1 = random.randint(1, 6)
+        rnd2 = random.randint(1, 6)
+        label_cube1.config(text='%d' % rnd1, font=('Arial', 20))
+        label_cube2.config(text='%d' % rnd2, font=('Arial', 20))
+        rnd_rerol = rnd1 + rnd2
+        if rnd_rerol == 7:
+            count_loos += 1
+            info_label.config(text='%d -- Sorry, you loose!\nYour wins: %d\nYour looses: %d' % (rnd_rerol, count_win, count_loos))
+        elif rnd_rerol == remember_rnd:
+            count_win += 1
+            info_label.config(text='%d -- Congrats!!! You winn!\nYour wins: %d\nYour looses: %d' % (rnd_rerol, count_win, count_loos))
+        else:
+            info_label.config(text='%d -- Keep Rolling!! \nYour wins: %d\nYour looses: %d' % (rnd_rerol, count_win, count_loos))
+
+    button_play = Button(root, text='Play!', command=callback)
+    button_play.place(relx=0.31, rely=0.53, width=50, height=40)
+    button_stop = Button(root, text='Re-Roll!', command=roll_for_p)
+    button_stop.place(relx=0.52, rely=0.53, width=50, height=40)
+
+    root.mainloop()
+
+
+main()
