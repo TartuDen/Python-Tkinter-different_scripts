@@ -1,0 +1,48 @@
+"""
+Blackjack (twenty-one) is a casino game played with cards. The goal of the game is to draw
+cards that total as close to 21 points as possible without going over. All face cards count as
+10 points, aces count as 1 or 11, and all other cards count their numeric value.
+The game is played against a dealer. The player tries to get closer to 21 (without going over)
+than the dealer. If the dealer busts (goes over 21), the player automatically wins (provided
+the player had not already busted). The dealer must always take cards according to a fixed
+set of rules. The dealer takes cards until he or she achieves a total of at least 17. If the dealer’s
+hand contains an ace, it will be counted as 11
+"""
+
+from tkinter import *
+from tkinter import ttk
+import random
+
+global stack
+stack = []
+for i in ['Clubs#', 'Diamonds#', 'Heearts#', 'Spades#']:
+    for j in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']:
+        stack.append(i + j)
+global Player_stack
+Player_stack = []
+
+
+def serve():
+    global stack
+    global Player_stack
+    i = 0
+    while i <= 5:
+        card = random.choice(stack)
+        if card in Player_stack == True:
+            continue
+        else:
+            Player_stack.append(card)
+            i += 1
+
+
+def main():
+    root = Tk()
+    root.geometry('800x600+400+100')
+    root.config(background='bisque2')
+    button_serve = Button(root, text='Serve', command=serve)
+    button_serve.grid(row=7, column=1)
+
+    root.mainloop()
+
+
+main()
