@@ -28,11 +28,16 @@ def serve():
     i = 0
     while i <= 5:
         card = random.choice(stack)
-        if card in Player_stack == True:
+        if i == 0:
+            Player_stack.append(card)
+            i += 1
+        elif card in Player_stack:
+            print('rejected =', card)
             continue
         else:
             Player_stack.append(card)
             i += 1
+            print('Accepted =', card)
 
 
 def main():
@@ -41,6 +46,7 @@ def main():
     root.config(background='bisque2')
     button_serve = Button(root, text='Serve', command=serve)
     button_serve.grid(row=7, column=1)
+    
 
     root.mainloop()
 
