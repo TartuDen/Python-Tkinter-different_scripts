@@ -15,38 +15,96 @@ import random
 
 global stack
 stack = []
-for i in ['Clubs#', 'Diamonds#', 'Heearts#', 'Spades#']:
+for i in ['Clubs # ', 'Diam. # ', 'Hearts # ', 'Spades # ']:
     for j in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']:
         stack.append(i + j)
 global Player_stack
 Player_stack = []
+global Bank_stack
+Bank_stack = []
 
 
-def serve():
+def serve(master):
     global stack
     global Player_stack
-    i = 0
-    while i <= 5:
+    global Bank_stack
+    for i in range(1, 3):
         card = random.choice(stack)
-        if i == 0:
+        if i % 2 == 0:
             Player_stack.append(card)
-            i += 1
-        elif card in Player_stack:
-            print('rejected =', card)
-            continue
+            # stack.remove(card)
         else:
-            Player_stack.append(card)
-            i += 1
-            print('Accepted =', card)
+            Bank_stack.append(card)
+            # stack.remove(card)
+
+    for i in range(len(Player_stack)):
+        edit = Player_stack[i]
+        edit = edit.split(' # ')
+        Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.7, width=70, height=150)
+
+    for i in range(len(Bank_stack)):
+        edit = Bank_stack[i]
+        edit = edit.split(' # ')
+        Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
+
+    Screen(master)
+
+
+def Screen(master):
+    global Player_stack
+    global Bank_stack
+    player_score = 0
+    bank_score = 0
+    label_bank = Label(master, text='bank')
+    label_bank.place(relx=0.88, rely=0.05, width=70, height=150)
+    label_player = Label(master, text='player')
+    label_player.place(relx=0.88, rely=0.7, width=70, height=150)
+    for i in range(len(Player_stack)):
+        edit = Player_stack[i]
+        edit = edit.split(' # ')
+        edit = edit[1]
+        if edit == '2' or edit == '3' or edit == '4' or edit == '5' or edit == '6' or edit == '7' or edit == '8' or edit == '9' or edit == '10':
+            edit = eval(edit)
+            player_score = player_score + edit
+        elif edit == 'Jack' or edit == 'Queen' or edit == 'King' or edit == 'Ace':
+            player_score = player_score + 10
+        label_player.config(text=('Your score is\n' + str(player_score)))
+
+    for i in range(len(Bank_stack)):
+        edit = Bank_stack[i]
+        edit = edit.split(' # ')
+        edit = edit[1]
+        if edit == '2' or edit == '3' or edit == '4' or edit == '5' or edit == '6' or edit == '7' or edit == '8' or edit == '9' or edit == '10':
+            edit = eval(edit)
+            bank_score = bank_score + edit
+        elif edit == 'Jack' or edit == 'Queen' or edit == 'King' or edit == 'Ace':
+            bank_score = bank_score + 10
+        label_bank.config(text=('Your score is\n' + str(bank_score)))
+
+
+# def take_one(master):
+#     global stack
+#     global Player_stack
+#     global Bank_stack
+#     card = random.choice(stack)
+#     Player_stack.append(card)
 
 
 def main():
     root = Tk()
     root.geometry('800x600+400+100')
+    root.resizable(False, False)
     root.config(background='bisque2')
-    button_serve = Button(root, text='Serve', command=serve)
-    button_serve.grid(row=7, column=1)
-    
+    button_serve = Button(root, text='Serve', command=lambda: serve(root))
+    button_serve.place(relx=0.01, rely=0.95)
+
+    button_one = Button(root, text='Take one', command=lambda: take_one(root))
+    button_one.place(relx=0.065, rely=0.95)
+
+    def Escape(event):
+        root.destroy()
+
+    root.bind('<Escape>', Escape)
 
     root.mainloop()
 
