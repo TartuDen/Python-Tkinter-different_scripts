@@ -2,7 +2,7 @@
 Blackjack (twenty-one) is a casino game played with cards. The goal of the game is to draw
 cards that total as close to 21 points as possible without going over. All face cards count as
 10 points, aces count as 1 or 11, and all other cards count their numeric value.
-The game is played against a dealer. The player tries to get closer to 21 (without going over)
+The game is played against a bank. The player tries to get closer to 21 (without going over)
 than the dealer. If the dealer busts (goes over 21), the player automatically wins (provided
 the player had not already busted). The dealer must always take cards according to a fixed
 set of rules. The dealer takes cards until he or she achieves a total of at least 17. If the dealer’s
@@ -13,15 +13,16 @@ from tkinter import *
 from tkinter import ttk
 import random
 
+
 global stack
 stack = []
 for i in ['Clubs # ', 'Diam. # ', 'Hearts # ', 'Spades # ']:
     for j in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']:
         stack.append(i + j)
-global Player_stack
-Player_stack = []
-global Bank_stack
-Bank_stack = []
+global player_stack
+player_stack = []
+global bank_stack
+bank_stack = []
 
 global player_score
 global bank_score
@@ -39,9 +40,9 @@ global player_pass
 player_pass = False
 
 
-def for_me(master):
+def player_move(master):
     global stack
-    global Player_stack
+    global player_stack
     global Bank_stack
     global player_score
     global player_win
@@ -51,10 +52,10 @@ def for_me(master):
     label_player.place(relx=0.88, rely=0.7, width=70, height=150)
 
     card = random.choice(stack)
-    Player_stack.append(card)
+    player_stack.append(card)
 
-    for i in range(len(Player_stack)):
-        edit = Player_stack[i]
+    for i in range(len(player_stack)):
+        edit = player_stack[i]
         edit = edit.split(' # ')
         Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.7, width=70, height=150)
 
@@ -69,14 +70,16 @@ def for_me(master):
     label_player.config(text=('Your score is\n' + str(player_score)))
     if player_score == 21:
         Label(master, text='You Win!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+        player_win = True
     elif player_score > 21:
         Label(master, text='You went over! Bank WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+        bank_win = True
 
 
-def round(master):
+def bank_move(master):
     global stack
-    global Player_stack
-    global Bank_stack
+    global player_stack
+    global bank_stack
     global bank_score
     global bank_win
     global player_win
@@ -87,10 +90,10 @@ def round(master):
 
     if bank_score <= 17:
         card = random.choice(stack)
-        Bank_stack.append(card)
+        bank_stack.append(card)
 
-        for i in range(len(Bank_stack)):
-            edit = Bank_stack[i]
+        for i in range(len(bank_stack)):
+            edit = bank_stack[i]
             edit = edit.split(' # ')
             Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
 
@@ -102,16 +105,16 @@ def round(master):
             bank_score = bank_score + edit2
         elif edit2 == 'Jack' or edit2 == 'Queen' or edit2 == 'King' or edit2 == 'Ace':
             bank_score = bank_score + 10
-        label_bank.config(text=('Bank score is\n' + str(bank_score)))
+        label_bank.config(text=('bank score is\n' + str(bank_score)))
         if bank_score == 21:
-            Label(master, text='Bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+            Label(master, text='bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
             bank_win = True
         elif bank_score > 21:
-            Label(master, text='Bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+            Label(master, text='bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
             player_win = True
 
     elif bank_score > 17:
-        Label(master, text='Bank Pass!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+        Label(master, text='bank Pass!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
         bank_pass = True
 
 
@@ -121,10 +124,10 @@ def clear(master):
     for i in ['Clubs # ', 'Diam. # ', 'Hearts # ', 'Spades # ']:
         for j in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']:
             stack.append(i + j)
-    global Player_stack
-    Player_stack = []
-    global Bank_stack
-    Bank_stack = []
+    global player_stack
+    player_stack = []
+    global bank_stack
+    bank_stack = []
 
     global player_score
     global bank_score
@@ -134,54 +137,52 @@ def clear(master):
     player_win = False
     global bank_win
     bank_win = False
+
+    global bank_pass
+    bank_pass = False
+
+    global player_pass
+    player_pass = False
     main()
 
 
-def Pass(master):
-    global player_pass
-    player_pass = True
-
-
 def main():
-    global player_win
-    global bank_win
     root = Tk()
     root.geometry('800x600+400+100')
     root.resizable(False, False)
-    main_fraim = Frame(root)
-    main_fraim.pack(fill=BOTH, expand=True)
-    main_fraim.config(background='bisque2')
+    canvas = Canvas(root)
+    canvas.pack(fill=BOTH, expand=True)
+    canvas.config(background='lightgreen')
 
     def Escape(event):
         root.destroy()
 
     root.bind('<Escape>', Escape)
 
-    waiting_callback = IntVar()
-    button_serve = Button(main_fraim, text='play', command=lambda: waiting_callback.set(1))
-    button_serve.place(relx=0.01, rely=0.95)
+    #____________________
+    button_play = Button(canvas, text='Play', command=lambda: waiting.set(1))
+    button_play.place(relx=0.01, rely=0.95)
 
-    button_clear = Button(main_fraim, text='Start Over', command=lambda: clear(main_fraim))
+    button_clear = Button(canvas, text='Clear', command=lambda: clear(canvas))
     button_clear.place(relx=0.9, rely=0.95)
 
-    button_pass = Button(main_fraim, text='Pass', command=lambda: Pass(main_fraim))
-    button_pass.place(relx=0.17, rely=0.95)
-
     turn = 1
-    while player_win == False and bank_win == False:
-        if turn % 2 != 0 and player_pass == False and bank_pass == False:
-            #Label(main_fraim, text='Are you playing?', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
-            button_serve.wait_variable(waiting_callback)
-            for_me(main_fraim)
+    waiting = IntVar()
+    while player_win == False and bank_win == False and player_pass == False and bank_pass == False:
+        if turn % 2 != 0:
+            button_play.wait_variable(waiting)
+            player_move(canvas)
+            turn += 1
+        elif turn % 2 == 0:
+            bank_move(canvas)
             turn += 1
 
-        elif turn % 2 == 0 and player_pass == False and bank_pass == False:
-            round(main_fraim)
-            turn += 1
-        else:
-            print('Pass')
-
+    if player_win:
+        print('Play wins')
+    elif bank_win:
+        print('Bank Wins')
     root.mainloop()
 
 
 main()
+
