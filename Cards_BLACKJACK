@@ -20,6 +20,20 @@ def passs(value):
         player_pass = True
 
 
+def bank_face(master, bank_stack):
+    for i in range(len(bank_stack)):
+        edit = bank_stack[i]
+        edit = edit.split(' # ')
+        Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
+
+
+def game_over(master, player_win, bank_win, player_score, bank_score):
+    if player_score > bank_score or player_win == True:
+        Label(master, text='YOU WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+    elif bank_score > player_score or bank_win == True:
+        Label(master, text='BANK WINS!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+
+
 def play(master, stack):
     global player_pass
     player_win = False
@@ -37,6 +51,9 @@ def play(master, stack):
 
     button_pass = Button(master, text='Pass', command=lambda: passs('True'))
     button_pass.place(relx=0.15, rely=0.95)
+
+    button_game = Button(master, text='Game over', command=lambda: game_over(master, player_win, bank_win, player_score, bank_score))
+    button_game.place(relx=0.9, rely=0.95)
     turn = 0
     while player_win == False and bank_win == False:
         turn += 1
@@ -64,10 +81,14 @@ def play(master, stack):
                     player_score = player_score + 10
                 label_player.config(text=('Your score is\n' + str(player_score)))
                 if player_score == 21:
+                    bank_face(master, bank_stack)
                     Label(master, text='You Win!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                    label_bank.config(text=('bank score is\n' + str(bank_score)))
                     player_win = True
                 elif player_score > 21:
+                    bank_face(master, bank_stack)
                     Label(master, text='You went over! Bank WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                    label_bank.config(text=('bank score is\n' + str(bank_score)))
                     bank_win = True
 
         elif turn % 2 == 0:
@@ -83,7 +104,7 @@ def play(master, stack):
                 for i in range(len(bank_stack)):
                     edit = bank_stack[i]
                     edit = edit.split(' # ')
-                    Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
+                    Label(master, text='Face \ndown!', font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
 
                 card = card.split(' # ')
                 card = card[1]
@@ -92,19 +113,27 @@ def play(master, stack):
                     bank_score = bank_score + card
                 elif card == 'Jack' or card == 'Queen' or card == 'King' or card == 'Ace':
                     bank_score = bank_score + 10
-                label_bank.config(text=('bank score is\n' + str(bank_score)))
                 if bank_score == 21:
+                    bank_face(master, bank_stack)
                     Label(master, text='bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                    label_bank.config(text=('bank score is\n' + str(bank_score)))
                     bank_win = True
                 elif bank_score > 21:
+                    bank_face(master, bank_stack)
                     Label(master, text='bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                    label_bank.config(text=('bank score is\n' + str(bank_score)))
                     player_win = True
 
             elif bank_score > 17:
                 Label(master, text='bank Pass!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
                 bank_pass = True
         if player_pass == True and bank_pass == True:
-            print('end', player_pass, bank_pass)
+            bank_face(master, bank_stack)
+            label_bank.config(text=('bank score is\n' + str(bank_score)))
+            if player_score > bank_score:
+                player_win = True
+            elif player_score < bank_score:
+                bank_win = True
             break
 
 
