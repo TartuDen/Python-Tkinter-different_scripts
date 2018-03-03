@@ -60,6 +60,7 @@ def play(master, stack):
     button_game = Button(master, text='Game over', command=lambda: game_over(master, player_win, bank_win, player_score, bank_score))
     button_game.place(relx=0.9, rely=0.95)
     turn = 0
+    dealer_ace = False
     while player_win == False and bank_win == False:
         turn += 1
         if turn % 2 != 0:
@@ -116,18 +117,23 @@ def play(master, stack):
                 if card == '2' or card == '3' or card == '4' or card == '5' or card == '6' or card == '7' or card == '8' or card == '9' or card == '10':
                     card = eval(card)
                     bank_score = bank_score + card
-                elif card == 'Jack' or card == 'Queen' or card == 'King' or card == 'Ace':
+                elif card == 'Jack' or card == 'Queen' or card == 'King':
                     bank_score = bank_score + 10
-                if bank_score == 21:
-                    bank_face(master, bank_stack)
-                    Label(master, text='bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
-                    label_bank.config(text=('bank score is\n' + str(bank_score)))
-                    bank_win = True
-                elif bank_score > 21:
-                    bank_face(master, bank_stack)
-                    Label(master, text='bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
-                    label_bank.config(text=('bank score is\n' + str(bank_score)))
-                    player_win = True
+                elif card == 'Ace':
+                    bank_score = bank_score + 1
+            elif bank_score == 21:
+                bank_face(master, bank_stack)
+                Label(master, text='bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                label_bank.config(text=('bank score is\n' + str(bank_score)))
+                bank_win = True
+            elif bank_score > 17 and bank_score <= 21:
+                if card == 'Ace':
+                    bank_score = bank_score + 11
+            elif bank_score > 21:
+                bank_face(master, bank_stack)
+                Label(master, text='bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                label_bank.config(text=('bank score is\n' + str(bank_score)))
+                player_win = True
 
             elif bank_score > 17:
                 Label(master, text='bank Pass!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
@@ -143,6 +149,7 @@ def play(master, stack):
 
 
 def main():
+    global player_pass
     root = Tk()
     root.geometry('800x600+400+100')
     root.resizable(False, False)
@@ -156,14 +163,19 @@ def main():
     canvas_delete = IntVar()
     new_game_button = Button(root, text='New Game?', command=lambda: canvas_delete.set(1))
     new_game_button.place(relx=0.7, rely=0.95, width=100)
-    print('here')
+
     new_game_button.wait_variable(canvas_delete)
-    print('here')
-    canvas.delete('all')
+
+    if canvas_delete:
+        root.destroy()
+        player_pass = False
+        main()
+
     root.mainloop()
 
 
 main()
+
 
 
 
