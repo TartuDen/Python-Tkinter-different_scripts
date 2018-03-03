@@ -14,8 +14,9 @@ def deck():
     return(stack)
 
 
-def passs(value):
+def player_pass_button(value):
     global player_pass
+    global turn
     if value == 'True':
         player_pass = True
 
@@ -34,6 +35,10 @@ def game_over(master, player_win, bank_win, player_score, bank_score):
         Label(master, text='BANK WINS!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
 
 
+def new_game(master):
+    pass
+
+
 def play(master, stack):
     global player_pass
     player_win = False
@@ -49,7 +54,7 @@ def play(master, stack):
     button_play = Button(master, text='Play', command=lambda: waiting.set(1))
     button_play.place(relx=0.01, rely=0.95, width=90)
 
-    button_pass = Button(master, text='Pass', command=lambda: passs('True'))
+    button_pass = Button(master, text='Pass', command=lambda: player_pass_button('True'))
     button_pass.place(relx=0.15, rely=0.95)
 
     button_game = Button(master, text='Game over', command=lambda: game_over(master, player_win, bank_win, player_score, bank_score))
@@ -60,7 +65,6 @@ def play(master, stack):
         if turn % 2 != 0:
             button_play.wait_variable(waiting)
             if player_pass == False:
-                button_play.config(text='Dealer play')
                 # Player_______________________________
 
                 label_player = Label(master, text='player')
@@ -92,7 +96,8 @@ def play(master, stack):
                     bank_win = True
 
         elif turn % 2 == 0:
-            button_play.config(text='Player turn')
+            if player_pass == True:
+                button_play.config(text='Banks Turn')
             # Bank____________________________________
             label_bank = Label(master, text='bank')
             label_bank.place(relx=0.88, rely=0.05, width=70, height=150)
@@ -142,13 +147,23 @@ def main():
     root.geometry('800x600+400+100')
     root.resizable(False, False)
     root.config(background='aquamarine')
+    canvas = Canvas(root)
+    canvas.pack(fill=BOTH, expand=True)
+    canvas.config(background='aquamarine')
 
     stack = deck()
-    play(root, stack)
-
+    play(canvas, stack)
+    canvas_delete = IntVar()
+    new_game_button = Button(root, text='New Game?', command=lambda: canvas_delete.set(1))
+    new_game_button.place(relx=0.7, rely=0.95, width=100)
+    print('here')
+    new_game_button.wait_variable(canvas_delete)
+    print('here')
+    canvas.delete('all')
     root.mainloop()
 
 
 main()
+
 
 
