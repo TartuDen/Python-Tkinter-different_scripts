@@ -5,12 +5,23 @@ import random
 global player_pass
 player_pass = False
 
+global labels_player
+labels_player = []
+global logos_player
+logos_player = []
+global labels_bank
+labels_bank = []
+global logos_bank
+logos_bank = []
+print
+
 
 def deck():
     stack = []
     for i in ['Clubs # ', 'Diam. # ', 'Hearts # ', 'Spades # ']:
         for j in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']:
             stack.append(i + j)
+
     return(stack)
 
 
@@ -22,10 +33,16 @@ def player_pass_button(value):
 
 
 def bank_face(master, bank_stack):
+    global labels_bank
+    global logos_bank
+    logos_bank = []
     for i in range(len(bank_stack)):
-        edit = bank_stack[i]
-        edit = edit.split(' # ')
-        Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
+        #labels_bank.append(Label(master, text='Face \ndown!', font=('Arial', 14)))
+        #labels_bank[i].place(relx=(2 + i) / 10, rely=0.05, width=130, height=180)
+        logos_bank.append(PhotoImage(file=r'D:\PROJECTS\Sublime Text 3\cards\%s.gif' % bank_stack[i]).subsample(1, 1))
+        labels_bank[i].config(image=logos_bank[i])
+
+    #Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
 
 
 def game_over(master, player_win, bank_win, player_score, bank_score):
@@ -41,6 +58,10 @@ def new_game(master):
 
 def play(master, stack):
     global player_pass
+    global labels_player
+    global logos_player
+    global labels_bank
+    global logos_bank
     player_win = False
     bank_win = False
     bank_pass = False
@@ -61,21 +82,26 @@ def play(master, stack):
     button_game.place(relx=0.9, rely=0.95)
     turn = 0
     dealer_ace = False
+
     while player_win == False and bank_win == False:
         turn += 1
         if turn % 2 != 0:
             button_play.wait_variable(waiting)
             if player_pass == False:
-                # Player_______________________________
+                # Player_____________________________________________________________________________________
 
                 label_player = Label(master, text='player')
                 label_player.place(relx=0.88, rely=0.7, width=70, height=150)
                 card = random.choice(stack)
                 player_stack.append(card)
+
                 for i in range(len(player_stack)):
                     edit = player_stack[i]
                     edit = edit.split(' # ')
-                    Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.7, width=70, height=150)
+                    labels_player.append(Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)))
+                    labels_player[i].place(relx=(2 + i) / 10, rely=0.6, width=130, height=180)
+                    logos_player.append(PhotoImage(file=r'D:\PROJECTS\Sublime Text 3\cards\%s.gif' % card).subsample(1, 1))
+                    labels_player[i].config(image=logos_player[i])
 
                 card = card.split(' # ')
                 card = card[1]
@@ -99,7 +125,7 @@ def play(master, stack):
         elif turn % 2 == 0:
             if player_pass == True:
                 button_play.config(text='Banks Turn')
-            # Bank____________________________________
+            # Bank_____________________________________________________________________________________________
             label_bank = Label(master, text='bank')
             label_bank.place(relx=0.88, rely=0.05, width=70, height=150)
 
@@ -110,7 +136,12 @@ def play(master, stack):
                 for i in range(len(bank_stack)):
                     edit = bank_stack[i]
                     edit = edit.split(' # ')
-                    Label(master, text='Face \ndown!', font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
+                    labels_bank.append(Label(master, text='Face \ndown!', font=('Arial', 14)))
+                    labels_bank[i].place(relx=(2 + i) / 10, rely=0.05, width=130, height=180)
+                    logos_bank.append(PhotoImage(file=r'D:\PROJECTS\Sublime Text 3\cards\downface.gif').subsample(1, 1))
+                    labels_bank[i].config(image=logos_bank[i])
+
+                    #Label(master, text='Face \ndown!', font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
 
                 card = card.split(' # ')
                 card = card[1]
@@ -121,23 +152,23 @@ def play(master, stack):
                     bank_score = bank_score + 10
                 elif card == 'Ace':
                     bank_score = bank_score + 1
-            elif bank_score == 21:
-                bank_face(master, bank_stack)
-                Label(master, text='bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
-                label_bank.config(text=('bank score is\n' + str(bank_score)))
-                bank_win = True
-            elif bank_score > 17 and bank_score <= 21:
-                if card == 'Ace':
-                    bank_score = bank_score + 11
-            elif bank_score > 21:
-                bank_face(master, bank_stack)
-                Label(master, text='bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
-                label_bank.config(text=('bank score is\n' + str(bank_score)))
-                player_win = True
-
-            elif bank_score > 17:
+            if bank_score > 17:
                 Label(master, text='bank Pass!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
                 bank_pass = True
+                if bank_score == 21:
+                    bank_face(master, bank_stack)
+                    Label(master, text='bank Wins!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                    label_bank.config(text=('bank score is\n' + str(bank_score)))
+                    bank_win = True
+                elif bank_score > 17 and bank_score <= 21:
+                    if card == 'Ace':
+                        bank_score = bank_score + 11
+                elif bank_score > 21:
+                    bank_face(master, bank_stack)
+                    Label(master, text='bank went over! You WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
+                    label_bank.config(text=('bank score is\n' + str(bank_score)))
+                    player_win = True
+
         if player_pass == True and bank_pass == True:
             bank_face(master, bank_stack)
             label_bank.config(text=('bank score is\n' + str(bank_score)))
@@ -150,6 +181,17 @@ def play(master, stack):
 
 def main():
     global player_pass
+    global labels_player
+    global logos_player
+    global labels_bank
+    global logos_bank
+    player_win = False
+    bank_win = False
+    bank_pass = False
+    player_stack = []
+    bank_stack = []
+    player_score = 0
+    bank_score = 0
     root = Tk()
     root.geometry('800x600+400+100')
     root.resizable(False, False)
@@ -167,6 +209,7 @@ def main():
     new_game_button.wait_variable(canvas_delete)
 
     if canvas_delete:
+        canvas_delete = IntVar()
         root.destroy()
         player_pass = False
         main()
@@ -175,7 +218,3 @@ def main():
 
 
 main()
-
-
-
-
