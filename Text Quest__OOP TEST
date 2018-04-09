@@ -1,0 +1,181 @@
+"""
+1 class Scene(object):
+2
+3 def enter(self):
+4 pass
+5
+6
+7 class Engine(object):
+8
+9 def __init__(self, scene_map):
+10 pass
+11
+12 def play(self):
+13 pass
+14
+15 class Death(Scene):
+16
+17 def enter(self):
+18 pass
+19
+20 class CentralCorridor(Scene):
+21
+22 def enter(self):
+23 pass
+24
+25 class LaserWeaponArmory(Scene):
+26
+27 def enter(self):
+28 pass
+29
+30 class TheBridge(Scene):
+31
+32 def enter(self):
+33 pass
+34
+35 class EscapePod(Scene):
+36
+37 def enter(self):
+38 pass
+39
+40
+41 class Map(object):
+42
+43 def __init__(self, start_scene):
+44 pass
+45
+46 def next_scene(self, scene_name):
+47 pass
+48
+BASIC OBJECT- ORIENTED ANALYSIS AND DESIGN 161
+49 def opening_scene(self):
+50 pass
+51
+52
+53 a_map = Map('central_corridor')
+54 a_game = Engine(a_map)
+55 a_game.play()
+
+
+
+"""
+
+import random
+from tkinter import*
+from tkinter import ttk
+import sys
+
+
+class Start(object):
+    def __init__(self, scene, name, weapon, armor):
+        self.scene = scene
+        self.name = name
+        self.weapon = weapon
+        self.armor = armor
+        print('You start your adventure in %s' % self.scene)
+        print('Hellow %s, How are you doing?\nI like your %s and %s!' % (self.name, self.weapon, self.armor))
+
+        input('Would you like to continue? <<press Enter>>')
+
+
+class Scene(object):
+    def __init__(self, current_scene, list_scenes, create, forest, glade, river, end):
+        self.current_scene = current_scene
+        self.list_scenes = list_scenes
+        self.create = create
+        self.forest = forest
+        self.glade = glade
+        self.river = river
+        self.end = end
+
+    def play(self):
+        a1 = input('you are in the middle of intersaction, left,right or forward?')
+        if a1 == 'left':
+            a2 = self.forest.puzzle_Forest1()
+            if a2 == 'WIN':
+                print('\nContinue...\n')
+                a3 = self.forest.puzzle_Forest2()
+                if a3 == 'WIN':
+                    print('\nContinue...\n')
+                    random.choice([self.glade.puzzle_Glade(), self.river.puzzle_River()])
+                elif a3 == 'Loos':
+                    a4 = input('Do you wanna play over? Y/N')
+                    if a4 == 'Y':
+                        main()
+                    else:
+                        sys.exit()
+
+            elif a2 == 'Loose':
+                a5 = input('Do you wanna play over? Y/N')
+                if a5 == 'Y':
+                    main()
+                else:
+                    sys.exit()
+
+        elif a1 == 'right':
+            self.glade.puzzle_Glade()
+        elif a1 == 'forward':
+            self.river.puzzle_River()
+
+
+class Forest(object):
+    def puzzle_Forest1(self):
+        print('<You are in the middle of a dark forest.>')
+        print('<A gaint troll is apeared:>\n- What u doing here! Go away!')
+        answer = input('<What you do?> \nKill with magic. \nEscape.\nBeg for your life:')
+        if answer == 'Kill' or answer == 'kill':
+            print('You wave with you staff and a fireball hit a gaint.')
+            print('you KiLL it! U did IT!')
+            return('WIN')
+        elif answer == 'Escape' or answer == 'escape':
+            print('You a trying to escape, but fail, the troll catches you and eats... Game over.')
+            return('Loose')
+        elif answer == 'Beg' or answer == 'beg':
+            print('You knee before this magnificant creature and start to beg fro your life.... \nbut it doesnt understand you moaning, so it just smashed you, you are dead...')
+            return('Loose')
+
+    def puzzle_Forest2(self):
+        print('After defeating than troll, you continue deeper in the forest and... run onto a gang of elves...')
+        choice = input('your actions:\nEscape:\nFight:\nTrick:')
+        if choice == 'Escape':
+            print('You tryed to escape, but got stuck in a near bushes... Elves cought you and kill.')
+            return('Loose')
+        elif choice == 'Fight':
+            print('You decided to fight, took you magic staff, cast the deadlies fireball you could and flin in into the group of elves,\nunfortunatelly they are imune to the magic, hence... you had no choice, you dead...')
+            return('Loose')
+        elif choice == 'Trick':
+            print('You put a magic hat, sneak into the camp and you was able to kill them all one by one! You survived!')
+            return('WIN')
+
+
+class Glade(object):
+    def puzzle_Glade(self):
+        (print('You find urself in a Glade!'))
+        main()
+
+
+class River(object):
+    def puzzle_River(self):
+        (print('You find urself close to River!'))
+        main()
+
+
+class StartOver(object):
+    def End(self):
+        return('Start again!')
+
+
+def main():
+    scenes = (['Forest', 'River', 'Glade'])
+    rnd = random.choice(scenes)
+    create = Start(rnd, 'Omigod', 'Magic Staff', 'Light Armor')
+    forest = Forest()
+    glade = Glade()
+    river = River()
+    end = StartOver()
+
+    scene = Scene(rnd, scenes, create, forest, glade, river, end)
+    scene.play()
+
+
+main()
