@@ -1,0 +1,107 @@
+from tkinter import*
+from tkinter import ttk
+
+
+class Size(object):
+    def __init__(self):
+        self.wx = 300
+        self.wy = 400
+        self.text_x = 60
+        self.text_y = 20
+
+        self.f_x = self.wx - 1
+        self.f_y = 400 - self.wy / 4
+
+
+class Graf(Size):
+    def __init__(self, master, size):
+        self.master = master
+        self.size = size
+        self.master.geometry('%dx%d+400+200' % (self.size.wx, self.size.wy))
+        self.master.resizable(False, False)
+        self.text = Text(self.master, width=self.size.text_x, height=self.size.text_y)
+        self.text.place(x=0, y=0)
+        self.text.config(font=("Arial", 15, "bold"))
+
+        self.frame = Frame(self.master, bg='dim gray')
+        self.frame.place(x=0, y=100, width=self.size.f_x, height=self.size.f_y)
+
+        self.buttons_name = {}
+        i = 0
+        for b in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '+', '-', '/', '*', '(', 'Enter', ')']:
+            self.buttons_name[b] = Button(self.frame, text=b, width=11, height=2, font=('Arial', 9), bg='light slate gray')
+
+            if i >= 0 and i <= 2:
+                self.buttons_name[b].grid(row=0, column=0 + i, padx=6, pady=(20, 3))
+            elif i >= 3 and i <= 5:
+                self.buttons_name[b].grid(row=1, column=0 + i - 3, padx=6, pady=3)
+            elif i >= 6 and i <= 8:
+                self.buttons_name[b].grid(row=2, column=0 + i - 6, padx=6, pady=3)
+            elif i >= 9 and i <= 11:
+                self.buttons_name[b].grid(row=3, column=0 + i - 9, padx=6, pady=3)
+            elif i >= 12 and i <= 14:
+                self.buttons_name[b].grid(row=4, column=0 + i - 12, padx=6, pady=3)
+            elif i >= 15:
+                self.buttons_name[b].grid(row=5, column=0 + i - 14, padx=6, pady=3)
+            i += 1
+        self.result = 0
+
+        def screen(event):
+            self.text.insert(INSERT, '%s' % event)
+            self.result = (self.text.get('1.0', 'end'))
+            if self.result == '2+2\n':
+                self.result = '22'
+
+        self.buttons_name['1'].bind('<1>', lambda e: screen(1))
+        self.buttons_name['2'].bind('<1>', lambda e: screen(2))
+        self.buttons_name['3'].bind('<1>', lambda e: screen(3))
+        self.buttons_name['4'].bind('<1>', lambda e: screen(4))
+        self.buttons_name['5'].bind('<1>', lambda e: screen(5))
+        self.buttons_name['6'].bind('<1>', lambda e: screen(6))
+        self.buttons_name['7'].bind('<1>', lambda e: screen(7))
+        self.buttons_name['8'].bind('<1>', lambda e: screen(8))
+        self.buttons_name['9'].bind('<1>', lambda e: screen(9))
+        self.buttons_name['0'].bind('<1>', lambda e: screen(0))
+        self.buttons_name['+'].bind('<1>', lambda e: screen('+'))
+        self.buttons_name['-'].bind('<1>', lambda e: screen('-'))
+        self.buttons_name['*'].bind('<1>', lambda e: screen('*'))
+        self.buttons_name['/'].bind('<1>', lambda e: screen('/'))
+        self.buttons_name['('].bind('<1>', lambda e: screen('('))
+        self.buttons_name[')'].bind('<1>', lambda e: screen(')'))
+
+        def Enter(event):
+
+            self.result = eval(self.result)
+            self.text.insert('end', '=%d' % self.result)
+        self.buttons_name['Enter'].bind('<1>', Enter)
+        self.master.bind('<Return>', Enter)
+
+        def Clear(event):
+            self.text.delete('1.0', 'end')
+
+        self.master.bind('<Escape>', Clear)
+
+        self.clear_b = Button(self.frame, text='C', width=11, height=2, bg='light slate gray')
+        self.clear_b.bind('<1>', Clear)
+        self.clear_b.grid(row=5, column=0, padx=6, pady=3)
+
+
+# class Calcs(object):
+#     def __init__(self,graf):
+#         self.graf=graf
+#         self.result=eval(self.graf.text.get('1.0','end'))
+#         print(self.result)
+
+
+def main():
+    size = Size()
+    root = Tk()
+
+    show = Graf(root, size)
+
+    # calcs=Calcs(show)
+
+    root.mainloop()
+
+
+main()
