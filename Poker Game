@@ -1,0 +1,232 @@
+"""
+13. Write a program that creates a list of card objects (see Programming Exercise 11 from Chapter
+10) and prints out the cards grouped by suit and in rank order within suit. Your program
+should read the list of cards from a file, where each line in the file represents a single card
+with the rank and suit separated by a space. Hint: first sort by rank and then by suit.
+
+
+Royal Flush 10, Jack, Queen, King, Ace, all of the same suit
+Straight Flush Five ranks in a row, all of the same suit
+Four of a Kind Four of the same rank
+Full House Three of one rank and two of another
+Flush Five cards of the same suit
+Straight Five ranks in a row
+Three of a kind Three of one rank (but not a full house or four of a kind)
+Two pair Two each of two different ranks
+Pair Two of the same rank (but not two pair, three or four of a kind)
+X High If none of the previous categories fit, X is the value of the highest rank. For example,
+if the largest rank is 11, the hand is “Jack high.”
+
+
+"""
+import random
+import time
+import sys
+from tkinter import *
+from tkinter import ttk 
+
+def Full_House(temp_rank2):
+    temp_dec = temp_rank2
+    rank1 = []
+    rank2 = []
+    size = len(temp_dec)
+    for i in range(size):
+        try:
+            if temp_dec[i] == temp_dec[i + 1] and temp_dec[i] == temp_dec[i + 2]:
+                rank1.append(temp_dec[i])
+                rank1.append(temp_dec[i + 1])
+                rank1.append(temp_dec[i + 2])
+                temp_dec.remove(temp_dec[i])
+                temp_dec.remove(temp_dec[i])
+                temp_dec.remove(temp_dec[i])
+
+        except:
+            None
+    for j in range(len(temp_dec)):
+        try:
+            if temp_dec[j] == temp_dec[j + 1]:
+                rank2.append(temp_dec[j])
+                rank2.append(temp_dec[j + 1])
+        except:
+            None
+    if len(rank1) == 3 and len(rank2) == 2:
+        return('<<<<Full_House!!!>>>')
+
+def Pairs(temp_rank2):
+    for i in range(len(temp_rank2)):
+        try:
+            if temp_rank2[i]==temp_rank2[i+1] and (temp_rank2[i+2]==temp_rank2[i+3] or temp_rank2[i+3]==temp_rank2[i+4]):
+                    return('<<<Two Pairs!!!>>>>')          
+        except:
+            None
+    for i in range(len(temp_rank2)):
+        try:
+            if temp_rank2[i]==temp_rank2[i+1]:
+                return('<<<Pair!!>>>')
+        except:
+            None
+
+def Straight_Four_and_Three_ofaKind(temp_rank2):
+    for i in range(len(temp_rank2)):
+        try:
+            if (temp_rank2[i+1]-temp_rank2[i])==1 and (temp_rank2[i+2]-temp_rank2[i])==2 and (temp_rank2[i+3]-temp_rank2[i])==3 and (temp_rank2[i+4]-temp_rank2[i])==4:
+                return('<<<Straight!>>>')
+            elif temp_rank2[i] == temp_rank2[i + 1] and temp_rank2[i] == temp_rank2[i + 2] and temp_rank2[i] == temp_rank2[i + 3]:
+                return('<<<Four Of A Kind!!!>>>')
+        except:
+            None
+    for i in range(len(temp_rank2)):
+        try:
+            if temp_rank2[i] == temp_rank2[i + 1] and temp_rank2[i] == temp_rank2[i + 2]:
+                return('<<<Three of a kind!!>>>')
+        except:
+            None
+
+def samesute(temp_sute, temp_rank, temp_rank2):
+    Strait_flush = 0
+    if temp_sute.count('diamond') == 5 or temp_sute.count('spade') == 5 or temp_sute.count('hearts') == 5 or temp_sute.count('clubs') == 5:
+        if '10' in temp_rank and 'Jack' in temp_rank and 'Queen' in temp_rank and 'King' in temp_rank and 'Ace' in temp_rank:
+            return('<<<<<Royal Flush!!>>>>')
+
+        for i in range(len(temp_rank2)):
+            try:
+                if temp_rank2[i + 1] - temp_rank2[i] == 1:
+                    Strait_flush += 1
+            except:
+                None
+            if Strait_flush == 5:
+                return('<<<<Strait Flush!!!>>>')
+
+        else:
+            return('<<<<Flush!!>>>>')
+
+class Cards(object):
+    def __init__(self):
+        self.cards_list = []
+        with open('numbers.txt', 'r') as r_file:
+            for line in r_file:
+                line = line.split(' ')
+                line[1] = line[1].strip('\n')
+                self.cards_list.append(line)
+            # print(len(self.cards_list))
+
+    def sorter(self, sort):
+        rank = {}
+        othersort = []
+        if sort == 'rank':
+            for card in self.cards_list:
+                try:
+                    rank[card[1]] = card[0]
+                except:
+                    None
+
+            return(rank)
+
+        elif sort:
+            for card in self.cards_list:
+                if sort == card[0]:
+                    othersort.append(card[0])
+                    othersort.append(card[1])
+
+                elif sort == card[1]:
+                    othersort.append(card[0])
+                    othersort.append(card[1])
+            return(othersort)
+
+    def five_cards(self, number):
+        hand = []
+        for card in self.cards_list:
+            rnd = self.cards_list[random.randint(1, 51)]
+            if (rnd in hand):
+                continue
+            hand.append(rnd)
+            if len(hand) == number:
+                break
+            else:
+                continue
+        return(hand)
+
+    def pocker_game(self, cards):
+        temp_sute = []
+        temp_rank = []
+        temp_rank2 = []
+        for i in range(len(cards)):
+            temp_sute.append(cards[i][0])
+            temp_rank.append(cards[i][1])
+        for i in temp_rank:
+            try:
+                i = int(i)
+            except:
+                if i == 'Jack':
+                    i = 11
+                elif i == 'Queen':
+                    i = 12
+                elif i == 'King':
+                    i = 13
+                elif i == 'Ace':
+                    i = 14
+            temp_rank2.append(i)
+            temp_rank2.sort()
+        print(temp_rank2)
+
+        if samesute(temp_sute, temp_rank, temp_rank2):
+            return(samesute(temp_sute, temp_rank, temp_rank2))
+
+        if Full_House(temp_rank2):
+            return(Full_House(temp_rank2))
+
+        if Straight_Four_and_Three_ofaKind(temp_rank2):
+            return(Straight_Four_and_Three_ofaKind(temp_rank2))
+        if Pairs(temp_rank2):
+            return(Pairs(temp_rank2))
+
+class Graph(object):
+    def __init__(self,master,cards):
+        self.master=master
+        self.cards=cards
+        self.new_deck=[]
+        self.shuffled_deck=[]
+        self.dealcard=[]
+        self.master.geometry('600x500+200+150')
+
+        self.b_constructor=Button(self.master,text='New Deck',command=lambda: self.constructor())
+        self.b_constructor.place(x=10,y=10,width=100)
+
+        self.b_shuffle=Button(self.master,text='Shuffle',command=lambda: self.shuffle())
+        self.b_shuffle.place(x=150,y=10,width=100)
+
+        self.b_dealcard=Button(self.master,text='Deal',command=lambda: self.dealCard())
+        self.b_dealcard.place(x=300,y=10,width=100)
+
+
+    def constructor(self):
+            self.new_deck=self.cards.cards_list            
+            print('new deck:  ',self.new_deck)
+    
+    def shuffle(self):
+        self.shuffled_deck=self.new_deck
+        random.shuffle(self.shuffled_deck)
+        print('Shuffle deck:>>>>>>>>>>>>>>>  ',self.shuffled_deck)
+    
+    def dealCard(self):
+        self.dealcard=self.shuffled_deck.pop(0)
+        print(self.dealcard)
+
+def main():
+    root=Tk()
+    
+    combination = '<<<<Strait Flush!!!>>>'
+    deck = Cards()
+    sort = 'Jack'
+    number = 5
+    (deck.sorter(sort))
+    cards = deck.five_cards(number)
+    print(cards)
+    print(deck.pocker_game(cards))
+    table=Graph(root,deck)
+
+
+
+    root.mainloop()
+if __name__ == '__main__':
+    main()
