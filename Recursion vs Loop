@@ -1,0 +1,50 @@
+import random
+import time
+global count1
+count1 = 0
+
+
+def recurs(x, a, b):
+    global count1
+    count1 += 1
+    i = int((a + b) / 2)
+    if i == x:
+        print('Recursion found it! it is a numb.: %d' % i)
+        return(1)
+    elif i < x:
+        a = i
+        recurs(x, a, b)
+    elif i > x:
+        b = i
+        recurs(x, a, b)
+
+
+def looping(x, a, b):
+    count2 = 0
+    for i in range(a, b):
+        count2 += 1
+        n = (a + b) / 2
+        if n == x:
+            print('loop found it! it is a numb.: %d' % n)
+            return(count2)
+        elif n < x:
+            a = n
+        elif n > x:
+            b = n
+
+
+a = 1
+b = 10000000000000000
+x = random.randint(a, b)
+start = time.time()
+recurs(x, a, b)
+stop = time.time()
+print('Recursion iterations: ', count1)
+print('Time for recursion: %f' % (stop - start))
+
+
+start = time.time()
+count = looping(x, a, b)
+stop = time.time()
+print('Looping iterations: ', count)
+print('Time for looping: %f' % (stop - start))
