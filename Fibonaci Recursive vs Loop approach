@@ -1,0 +1,30 @@
+def fibo_recusive(n,list_Recursive,a,b):
+    if len(list_Recursive)<3:
+        list_Recursive.append(a)
+        list_Recursive.append(b)
+    if len(list_Recursive)==n:
+        return(1)
+    else:
+        a,b=b,a+b
+        list_Recursive.append(b)
+        fibo_recusive(n,list_Recursive,a,b)
+
+def fib_loop(n):
+    list_Loop=[]
+    list_Loop.append(1)
+    list_Loop.append(1)
+    
+    for i in range(2,n):       
+        list_Loop.append(list_Loop[i-1]+list_Loop[i-2])
+    return(list_Loop)
+
+list_Recursive=[]
+a=1
+b=1
+n=20
+print('Recursive Approach: ')
+fibo_recusive(n,list_Recursive,a,b)
+print(list_Recursive)
+
+print('Loop Approach: ')
+print(fib_loop(n))
