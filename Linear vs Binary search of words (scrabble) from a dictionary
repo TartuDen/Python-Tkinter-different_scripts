@@ -1,0 +1,125 @@
+"""
+Write a program that solves word jumble problems. You will need a large dictionary of
+English words (see previous problem). The user types in a scrambled word, and your program
+
+generates all anagrams of the word and then checks which (if any) are in the dictionary. The
+anagrams appearing in the dictionary are printed as solutions to the puzzle.
+
+"""
+import sys
+sys.path.insert(0, 'C:/C')
+import script
+import random
+import time
+
+count_rec = 0
+class SpellChecker(object):
+    def __init__(self, file=r'C:/C/text.txt', dict_file=r'C:/C/NewDeict.txt'):
+        self.file = file
+        self.dict_file = dict_file
+
+    def make_a_dict(self):
+        new_dict = script.OneWordFile(self.file)
+        new_dict.ordered()
+
+    def searcher_word(self, word_to_search):
+        find = False
+        word_upper = word_to_search.upper()
+        with open(self.dict_file, 'r', encoding='utf-8') as r_file:
+            for line in r_file:
+                if word_upper == line or (word_upper + '\n') == line:
+                    find = True
+
+            if not find:
+                print('Word <%s> is wrong!!' % word_to_search)
+
+    def sentance_search(self, sentance_to_search):
+        sentance_ = sentance_to_search.split(' ')
+        for word in sentance_:
+            self.searcher_word(word)
+class Anagramms(object):
+    def __init__(self, word_for_anagram):
+        self.word_for_anagram = word_for_anagram
+    def mixer(self):
+        global count_rec
+        letters_ = []
+        combinations = set()
+        for ch in self.word_for_anagram:
+            ch = ch.upper()
+            letters_.append(ch)
+        for i in range(2, len(letters_) + 1):  # here 2- two-letters words, etc...
+            for j in range(99000):  # this number regukates how many word will be found.
+                try:
+                    comb_w = ''
+                    temp_ = letters_[:]
+                    for h in range(i):
+                        rnd_letter = random.choice(temp_)
+                        comb_w = comb_w + rnd_letter
+                        temp_.remove(rnd_letter)
+                    combinations.add(comb_w)
+                except:
+                    None
+    #__________________________ loop search ________________
+        # start = time.time()
+        # self.dict_check_loop(combinations)
+        # stop = time.time()
+        # print('loop time: %f' % (stop - start))
+    #________________________binary search _________________
+        start = time.time()
+        self.dict_check_binary(combinations)
+        stop = time.time()
+        print('total: ', count_rec)
+        print('recursive time: %f' % (stop - start))
+
+    def dict_check_loop(self, word_to_check_in_dict):
+        temp_list_for_dict = []
+        temp_list_for_search = list(word_to_check_in_dict)
+        with open(r'C:/C/NewDeict.txt', 'r', encoding='utf-8') as r_file:
+            for line in r_file:
+                temp_list_for_dict.append(line)
+        count = 0
+        for word in temp_list_for_search:
+            for words in temp_list_for_dict:
+                if (word + '\n') == words:
+                    count += 1
+                    print(word)
+        print('In total %d' % count)
+
+    def dict_check_binary(self, word_to_check_in_dict):
+        temp_list_for_dict = []
+        temp_list_for_search = list(word_to_check_in_dict)
+        with open(r'C:/C/NewDeict.txt', 'r', encoding='utf-8') as r_file:
+            for line in r_file:
+                line = line.strip('\n')
+                temp_list_for_dict.append(line)
+        temp_list_for_dict = sorted(temp_list_for_dict)
+
+        for word in temp_list_for_search:
+            self.binary(temp_list_for_dict, word)
+
+    def binary(self, list_, word_):
+        global count_rec
+        a = 0
+        b = (len(list_) - 1)
+        n = 0
+        while(b - a) > 1:
+            n = int((a + b) / 2)
+            if word_ == list_[n]:
+                print(word_)
+                count_rec += 1
+                break
+            elif word_ > list_[n]:
+                a = n
+                continue
+            elif word_ < list_[n]:
+                b = n
+                continue
+
+w = 'tallinn'
+# new_task = SpellChecker()
+# new_task.make_a_dict()
+# new_task.searcher_word(w)
+# new_task.sentance_search('Who cant code')
+
+word = Anagramms(w)
+word.mixer()
