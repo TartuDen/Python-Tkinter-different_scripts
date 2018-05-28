@@ -1,0 +1,84 @@
+import random
+import time
+
+countA = []
+countB = []
+
+
+class Player(object):
+    def __init__(self, prob):
+        self.prob = prob
+        self.score = 0
+
+
+class Play(object):
+    def __init__(self, n_games):
+        self.n_games = n_games
+        self.playerA = Player(56)
+        self.playerB = Player(55)
+        self.game = Game()
+
+    def start(self):
+        playerA_point = False
+        playerB_point = False
+        for i in range(2, self.n_games + 1):
+            self.continue_(playerA_point, playerB_point, i)
+            if self.playerA.score == 7 or self.playerB.score == 7:
+                self.game.Result(self.playerA.score, self.playerB.score)
+                break
+
+    def continue_(self, pA, pB, i):
+        j = i
+        while pA == False and pB == False:
+            # time.sleep(1)
+            rnd = random.randint(1, 100)
+            if j % 2 == 0:
+                if j == i:
+                    pass
+                    #print('<<Player A is serving>>')
+                if rnd > self.playerA.prob:
+                    #print('Player A Loose the serve')
+                    self.playerB.score += 1
+                    #print('player A score: ', self.playerA.score)
+                    #print('player B score: ', self.playerB.score)
+                    pA = True
+                elif rnd <= self.playerA.prob:
+                    #print('***Player A hit the ball***')
+                    j += 1
+                    continue
+            elif j % 2 != 0:
+                if j == i:
+                    pass
+                    #print('<<Player B is serving>>')
+                if rnd > self.playerB.prob:
+                    #print('Player B Loose the serve')
+                    self.playerA.score += 1
+                    #print('player A score: ', self.playerA.score)
+                    #print('player B score: ', self.playerB.score)
+                    pA = True
+                elif rnd <= self.playerB.prob:
+                    #print('***Player B hit the ball***')
+                    j += 1
+                    continue
+
+
+class Game(object):
+    global countA
+    global countB
+
+    def Result(self, A, B):
+        if A > B:
+            countA.append('A wins: %d - %d' % (A, B))
+        else:
+            countB.append('B wins: %d - %d' % (B, A))
+
+
+for i in range(20000):
+    play = Play(20)
+    play.start()
+
+[print(x) for x in countA]
+print('----------------')
+[print(x) for x in countB]
+print('----------------')
+print('Total result: \nA - %d;\nB - %d;\nRaiting is %.3f of wins of A' % (len(countA), len(countB), (len(countA) / (len(countA) + len(countB)))))
