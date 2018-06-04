@@ -1,0 +1,431 @@
+from tkinter import*
+from tkinter import ttk
+import random
+import time
+
+roll_time_player=0
+roll_time_bank=0
+glob_move=''
+game=False
+
+
+class Graph(object):
+
+    def __init__(self,master):
+        self.deck = [1, 2, 3, 4, 5, 6]
+        self.master=master
+        self.playerA=Player()
+        self.playerA.money=500
+        self.playerB=Player()
+        self.playerB.money=900
+        self.calcA=Calc()
+        self.calcB=Calc()
+        
+        self.diceA_buttons=[]
+        self.diceB_buttons=[]
+
+        self.button_serve = Button(self.master, text='Serve', command=self.serve_initial)
+        self.button_serve.place(x=10, y=10, width=50)
+
+
+        self.button_pass=Button(self.master,text='Pass',command=self.pass_)
+        self.button_pass.place(x=100, y=10, width=50)
+
+        self.button_roll=Button(self.master,text='Roll_all',command=self.roll_all)
+        self.button_roll.place(x=180, y=10, width=50)
+
+
+        self.info_money=Label(self.master,text='Player: %d\nBank: %d'%(self.playerA.money,self.playerB.money),bg='peach puff',font=('Arial',16))
+        self.info_money.place(x=70,y=200,width=200,height=100)
+
+        self.info_turns_results=Label(self.master,text='',bg='peach puff',font=('Arial',16))
+        self.info_turns_results.place(x=300,y=200,width=200,height=100)
+
+        self.b_reset=Button(self.master,text='Reset',command=self.reset)
+        self.b_reset.place(x=380, y=10, width=50)
+
+        def esc_():
+            self.master.destroy()
+
+        self.master.bind('<Escape>',lambda e: esc_())
+
+
+        
+
+
+        self.contA=Controll(self)
+        self.contB=Controll(self)
+
+    def reset(self):
+        global roll_time_player
+        roll_time_player=0
+        global roll_time_bank
+        roll_time_bank=0
+        global glob_move
+        glob_move='Player'
+        self.playerA.money=500
+        self.playerB.money=900
+        for i in range(len(self.diceA_buttons)):
+            self.diceA_buttons[i].destroy()
+            self.diceB_buttons[i].destroy()
+        self.diceA_buttons=[]
+        self.diceB_buttons=[]
+        self.playerA.hand=[]
+        self.playerB.hand=[]
+        print('\n\n_____________________\n\n')
+
+
+    def serve_initial(self):
+        global glob_move
+        if len(self.playerA.hand)<5:
+            glob_move='Player'
+            self.playerA.money=self.playerA.money-100
+            self.playerB.money=self.playerB.money-100
+
+            for i in range(0,5):
+                rnd1=random.choice(self.deck)
+                rnd2=random.choice(self.deck)
+                self.playerA.hand.append(rnd1)
+                self.diceA_buttons.append(Button(self.master,text='%d'%rnd1,bg='lightgreen',font=('Arial',17)))
+                self.diceA_buttons[i].place(relx=0.05+(i+1)*0.12,rely=0.7,width=70,height=100)
+                self.playerB.hand.append(rnd2)
+                self.diceB_buttons.append(Button(self.master,text='%d'%rnd2,bg='lightgreen',font=('Arial',17)))
+                self.diceB_buttons[i].place(relx=0.05+(i+1)*0.12,rely=0.17,width=70,height=100)
+            self.info_money.config(text='Player: %d\nBank: %d'%(self.playerA.money,self.playerB.money))
+            self.info_turns_results.config(text='%s turn'%glob_move)
+
+
+   
+                
+        else:
+            print('The hand is Full!!!')
+        self.diceA_buttons[0].config(command=lambda: self.roll_one(self.diceA_buttons[0]))
+        self.diceA_buttons[1].config(command=lambda: self.roll_one(self.diceA_buttons[1]))
+        self.diceA_buttons[2].config(command=lambda: self.roll_one(self.diceA_buttons[2]))
+        self.diceA_buttons[3].config(command=lambda: self.roll_one(self.diceA_buttons[3]))
+        self.diceA_buttons[4].config(command=lambda: self.roll_one(self.diceA_buttons[4]))
+
+
+        resA=self.calcA.calc(self.playerA.hand)      
+        resB=self.calcB.calc(self.playerB.hand)       
+        if resA:
+            print('Player has: ',resA)
+        if resB:
+            print('Bank has: ',resB)
+
+    def pass_(self):
+        global glob_move
+        global roll_time_player
+        if glob_move=='Player':
+            roll_time_player+=1
+            glob_move='Bank'
+        elif glob_move=='Bank':
+            glob_move='Player'
+        
+
+        self.info_turns_results.config(text='%s turn' % glob_move)
+        self.master.update()
+        time.sleep(0.5)
+        resA=self.calcA.calc(self.playerA.hand)
+
+        resB=self.calcB.calc(self.playerB.hand)       
+        self.contB.analize(resB)
+        if End_():
+            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+
+
+    def roll_all(self):
+        global roll_time_player
+        global glob_move
+        roll_time_player+=1
+        if roll_time_player<=2:
+            self.playerA.money=self.playerA.money-10
+            self.info_money.config(text='Player: %d\nBank: %d'%(self.playerA.money,self.playerB.money))
+            for i in range(0,5):
+                rnd=random.choice(self.deck)
+                self.playerA.hand[i]=rnd
+                self.diceA_buttons[i].config(text='%d'%rnd)
+        else:
+            print('Limit Rolls reached.')
+        resA=self.calcA.calc(self.playerA.hand)      
+        resB=self.calcB.calc(self.playerB.hand)       
+        if resA:
+            print('Player has: ',resA)
+        if resB:
+            print('Bank has: ',resB)
+        if glob_move=='Player':
+            glob_move='Bank'
+        elif glob_move=='Bank':
+            glob_move='Player'
+        self.master.update()
+        time.sleep(0.5)
+        self.info_turns_results.config(text='%s turn' % glob_move)
+        resB=self.calcB.calc(self.playerB.hand)       
+        resA=self.calcA.calc(self.playerA.hand)       
+        self.contB.analize(resB)
+        if End_():
+            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+
+
+    def roll_one(self,button_):
+        global roll_time_player
+        roll_time_player+=1
+        if roll_time_player<=2:
+            self.playerA.money=self.playerA.money-10
+            self.info_money.config(text='Player: %d\nBank: %d'%(self.playerA.money,self.playerB.money))
+            rnd=random.choice(self.deck)
+            button_.config(text='%d'%rnd)
+            self.playerA.hand[self.diceA_buttons.index(button_)]=rnd
+        else:
+            print('Limit Rolls reached.')
+
+        resA=self.calcA.calc(self.playerA.hand)      
+        resB=self.calcB.calc(self.playerB.hand)       
+        if resA:
+            print('Player has: ',resA)
+        if resB:
+            print('Bank has: ',resB)
+        if End_():
+            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+
+
+
+
+
+
+class Player(object):
+    def __init__(self):
+        self.money=0
+        self.hand=[]
+
+
+
+class Calc(object):
+    def __init__(self):
+        pass
+
+
+    def calc(self,hand):
+        hand=sorted(hand)
+
+        def two_pairs(hand):
+            local=hand[:]
+            pair=0
+            try:
+                size=len(local)
+                for i in range(size):
+                    if local[i]==local[i+1]:
+                        pair+=1
+                        local.remove(local[i])
+                        local.remove(local[i+1])
+            except:
+                None
+            if pair==2:
+                #print('<<TWO PAIRS!>>')
+                return(1)
+        def three_of_a_kind(hand):
+            local=hand[:]
+            three=False
+            try:
+                size=len(local)
+                for i in range(size):
+                    if local[i]==local[i+1] and local[i]==local[i+2]:
+                        three=True
+
+            except:
+                None
+            if three:
+                #print('<<Three Of A Kind>>')
+                return(1)
+
+        def full_house(hand):
+            local=hand[:]
+            pair=False
+            three=False
+            try:
+                size=len(local)
+                for i in range(size):
+                    if local[i]==local[i+1]:
+                        local.remove(local[i])
+                        local.remove(local[i])
+                        pair=True
+                        break
+                size=len(local)
+                for i in range(size):
+                    if local[i]==local[i+1] and local[i]==local[i+2]:
+                        three=True
+
+            except:
+                None
+            if three and pair:
+                #print('<<Full House!>>')
+                return(1)
+
+        def four_of_a_kind(hand):
+            local=hand[:]
+            four=False
+            try:
+                size=len(local)
+                for i in range(size):
+                    if local[i]==local[i+1] and local[i]==local[i+2] and local[i]==local[i+3]:
+                        four=True
+            except:
+                None
+            if four:
+                #print('<<Four Of A Kind>>')
+                return(1)
+
+        def straight(hand):
+            local=hand[:]
+            straight=False
+            try:
+                size=len(local)
+                for i in range(size):
+                    if local[i]==1 and local[i+1]==2 and local[i+2]==3 and local[i+3]==4 and local[i+4]==5:
+                        straight=True
+                    if local[i]==2 and local[i+1]==3 and local[i+2]==4 and local[i+3]==5 and local[i+4]==6:
+                        straight=True
+            except:
+                None
+            if straight:
+                #print('<<Straight!>>')
+                return(1)
+
+        def five_of_a_kind(hand):
+            local=hand[:]
+            five=False
+            try:
+                size=len(local)
+                for i in range(size):
+                    if local[i]==local[i+1] and local[i]==local[i+2] and local[i]==local[i+3] and local[i]==local[i+4]:
+                        five=True
+            except:
+                None
+            if five:
+                #print('<<Five Of A Kind>>')
+                return(1)
+
+
+        print('hand is: ',hand)
+
+        if five_of_a_kind(hand):
+            return('five of a kind')
+        elif straight(hand):
+            return('straight')
+        elif four_of_a_kind(hand):
+            return('four of a kind')
+        elif full_house(hand):
+            return('full house')
+        elif three_of_a_kind(hand):
+            return('three of a kind')
+        elif two_pairs(hand):
+            return('two pairs')
+
+
+
+
+
+
+class Controll(object):
+    def __init__(self,graph_parent):
+        self.graph_parent=graph_parent
+
+
+
+    def analize(self,resBank):
+        global roll_time_bank
+        global glob_move
+        glob_move='Player'
+        if roll_time_bank<=2:
+            roll_time_bank+=1
+            self.graph_parent.master.update()
+            time.sleep(0.5)
+            if resBank==None:
+                self.roll_all()
+            elif resBank=='five of a kind':
+                print('Bank pass!')
+            elif resBank=='straight':
+                print("Bank pass!")
+            elif resBank=='four of a kind':
+                print("Bank pass!")
+            elif resBank=='full house':
+                print("Bank pass!")
+            elif resBank=='three of a kind':
+                print("Bank pass!")
+            elif resBank=='two pairs':
+                print("Bank pass!")
+            self.graph_parent.info_turns_results.config(text='%s turn'%glob_move)
+        else:
+            print('<<<Bank has reached its limit>>>')
+
+
+    # def pass_(self):
+    #     glob_move='Bank'     
+    #     resB=self.calcB.calc(self.playerB.hand)       
+    #     self.contB.analize(resB)
+
+
+    def roll_all(self):
+        global roll_time_bank
+        roll_time_bank+=1
+        if roll_time_bank<=2:
+            self.graph_parent.playerB.money=self.graph_parent.playerB.money-10
+            self.graph_parent.info_money.config(text='Player: %d\nBank: %d'%(self.graph_parent.playerA.money,self.graph_parent.playerB.money))
+            for i in range(0,5):
+                rnd=random.choice(self.graph_parent.deck)
+                self.graph_parent.playerB.hand[i]=rnd
+                self.graph_parent.diceB_buttons[i].config(text='%d'%rnd)
+        else:
+            print('Limit Rolls reached.')
+        resA=self.graph_parent.calcA.calc(self.graph_parent.playerA.hand)      
+        resB=self.graph_parent.calcB.calc(self.graph_parent.playerB.hand)       
+        if resA:
+            print('Player has: ',resA)
+        if resB:
+            print('Bank has: ',resB)
+        if End_():
+            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+
+
+    # def roll_one(self,button_):
+    #     global roll_time_player
+    #     roll_time_player+=1
+    #     if roll_time_player<=2:
+    #         self.playerA.money=self.playerA.money-10
+    #         self.info_money.config(text='Player: %d\nBank: %d'%(self.playerA.money,self.playerB.money))
+    #         rnd=random.choice(self.deck)
+    #         button_.config(text='%d'%rnd)
+    #         self.playerA.hand[self.diceA_buttons.index(button_)]=rnd
+    #     else:
+    #         print('Limit Rolls reached.')
+
+    #     resA=self.calcA.calc(self.playerA.hand)      
+    #     resB=self.calcB.calc(self.playerB.hand)       
+    #     if resA:
+    #         print('Player has: ',resA)
+    #     if resB:
+    #         print('Bank has: ',resB)
+
+def End_():
+    global roll_time_player
+    global roll_time_bank
+    print(roll_time_player,roll_time_bank)
+    if roll_time_bank==2 and roll_time_player==2:
+        return('End')
+    else:
+        return(0)
+
+
+def main():
+    root = Tk()
+    root.geometry('600x500+600+300')
+    aGame = Graph(root)
+
+
+    root.mainloop()
+
+
+
+
+
+main()
