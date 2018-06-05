@@ -6,7 +6,7 @@ import time
 roll_time_player=0
 roll_time_bank=0
 glob_move=''
-game=False
+bank_pass=False
 
 
 class Graph(object):
@@ -36,10 +36,10 @@ class Graph(object):
 
 
         self.info_money=Label(self.master,text='Player: %d\nBank: %d'%(self.playerA.money,self.playerB.money),bg='peach puff',font=('Arial',16))
-        self.info_money.place(x=70,y=200,width=200,height=100)
+        self.info_money.place(x=20,y=200,width=200,height=100)
 
         self.info_turns_results=Label(self.master,text='',bg='peach puff',font=('Arial',16))
-        self.info_turns_results.place(x=300,y=200,width=200,height=100)
+        self.info_turns_results.place(x=250,y=200,width=300,height=100)
 
         self.b_reset=Button(self.master,text='Reset',command=self.reset)
         self.b_reset.place(x=380, y=10, width=50)
@@ -121,8 +121,6 @@ class Graph(object):
             glob_move='Bank'
         elif glob_move=='Bank':
             glob_move='Player'
-        
-
         self.info_turns_results.config(text='%s turn' % glob_move)
         self.master.update()
         time.sleep(0.5)
@@ -131,7 +129,7 @@ class Graph(object):
         resB=self.calcB.calc(self.playerB.hand)       
         self.contB.analize(resB)
         if End_():
-            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+            self.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
 
 
     def roll_all(self):
@@ -164,11 +162,12 @@ class Graph(object):
         resA=self.calcA.calc(self.playerA.hand)       
         self.contB.analize(resB)
         if End_():
-            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+            self.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
 
 
     def roll_one(self,button_):
         global roll_time_player
+        global glob_move
         roll_time_player+=1
         if roll_time_player<=2:
             self.playerA.money=self.playerA.money-10
@@ -185,8 +184,17 @@ class Graph(object):
             print('Player has: ',resA)
         if resB:
             print('Bank has: ',resB)
+        if glob_move=='Player':
+            glob_move='Bank'
+        elif glob_move=='Bank':
+            glob_move='Player'
+        self.master.update()
+        time.sleep(0.5)
+        self.info_turns_results.config(text='%s turn' % glob_move)
+        self.contB.analize(resB)
         if End_():
-            self.graph_parent.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+            self.info_turns_results.config(text='Player has %s;\nBank has %s'%(resA,resB))
+
 
 
 
@@ -217,7 +225,6 @@ class Calc(object):
                     if local[i]==local[i+1]:
                         pair+=1
                         local.remove(local[i])
-                        local.remove(local[i+1])
             except:
                 None
             if pair==2:
@@ -306,8 +313,6 @@ class Calc(object):
                 return(1)
 
 
-        print('hand is: ',hand)
-
         if five_of_a_kind(hand):
             return('five of a kind')
         elif straight(hand):
@@ -321,20 +326,14 @@ class Calc(object):
         elif two_pairs(hand):
             return('two pairs')
 
-
-
-
-
-
 class Controll(object):
     def __init__(self,graph_parent):
         self.graph_parent=graph_parent
 
-
-
     def analize(self,resBank):
         global roll_time_bank
         global glob_move
+        global bank_pass
         glob_move='Player'
         if roll_time_bank<=2:
             roll_time_bank+=1
@@ -344,16 +343,22 @@ class Controll(object):
                 self.roll_all()
             elif resBank=='five of a kind':
                 print('Bank pass!')
+                bank_pass=True
             elif resBank=='straight':
                 print("Bank pass!")
+                bank_pass=True
             elif resBank=='four of a kind':
                 print("Bank pass!")
+                bank_pass=True
             elif resBank=='full house':
                 print("Bank pass!")
+                bank_pass=True
             elif resBank=='three of a kind':
                 print("Bank pass!")
+                bank_pass=True
             elif resBank=='two pairs':
                 print("Bank pass!")
+                bank_pass=True
             self.graph_parent.info_turns_results.config(text='%s turn'%glob_move)
         else:
             print('<<<Bank has reached its limit>>>')
@@ -410,7 +415,7 @@ def End_():
     global roll_time_player
     global roll_time_bank
     print(roll_time_player,roll_time_bank)
-    if roll_time_bank==2 and roll_time_player==2:
+    if roll_time_bank>=2 and roll_time_player>=2:
         return('End')
     else:
         return(0)
@@ -429,3 +434,4 @@ def main():
 
 
 main()
+
