@@ -27,7 +27,7 @@ class Graph(object):
 		self.master.bind('<Escape>',lambda e:Esc())
 
 		self.wordz=w0rd(self)
-		self.master.bind('<space>',lambda e: self.wordz.start())
+		self.master.bind('<space>',lambda e: self.wordz.test_cont())
 
 
 
@@ -37,61 +37,85 @@ class w0rd():
 		self.list_rus=[]
 		self.list_esp=[]
 		self.list_eng=[]
-		limit=1000
+		k=''
 
-		# wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
-		# for table in wordDoc.tables:
-		# 	for row in table.rows:
-		# 		c=0
-		# 		for cell in row.cells:
-		# 			c+=1
-		# 			if c==1:
-		# 				self.list_rus.append(cell.text)
-		# 			elif c==2:
-		# 				self.list_eng.append(cell.text)
-		# 			elif c==3:
-		# 				self.list_esp.append(cell.text)
-		# 			else:
-		# 				break
 
-	# def test_cont(self):
-	# 	rnd=random.randint(1,len(self.list_rus))
-	# 	print(self.list_rus[rnd])
-	# 	print('-----------------')
-	# 	print(self.list_eng[rnd])
-	# 	print('-----------------')
-	# 	print(self.list_esp[rnd])
-	# 	print('-----------------')
-	# 	print(len(self.list_rus))
-	# 	print(len(self.list_eng))
-	# 	print(len(self.list_esp))
 
-	def start(self):
-		wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
-		r=0
-		rnd=random.randint(1,2101)
+		wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/V1.docx')
 		for table in wordDoc.tables:
 			for row in table.rows:
-				r+=1
-				if r==rnd:
-					c=0
-					for cell in row.cells:
-						print(rnd)
-						c+=1
-						if c==1:
-							self.graph_.text_rus.delete('1.0','end')
-							self.graph_.text_rus.insert('1.0',cell.text)
-						elif c==2:
-							self.graph_.text_esp.delete('1.0','end')
-							self.graph_.text_esp.insert('1.0',cell.text)
-
-						elif c==3:
-							self.graph_.text_eng.delete('1.0','end')
-							self.graph_.text_eng.insert('1.0',cell.text)
+				c=[]
+				for cell in row.cells:
+					if c not in [' ','\n']:
+						if cell.text not in c:
+							c.append(cell.text)
+				for i in range(len(c)):
+					if i==0:
+						if type(c[i])==type(k):
+							self.list_rus.append(c[i])
 						else:
-							break
-				else:
-					continue
+							self.list_rus.append('None')
+
+					elif i==1:
+						if type(c[i])==type(k):
+							self.list_rus.append(c[i])
+						else:
+							self.list_rus.append('None')
+					elif i==2:
+						if type(c[i])==type(k):
+							self.list_rus.append(c[i])
+						else:
+							self.list_rus.append('None')
+					else:
+						break
+				print('---------')
+		for i in range(len(self.list_rus)):
+			print('<',self.list_rus[i],'>')
+			print('<',self.list_esp[i],'>')
+			print('<',self.list_eng[i],'>')
+			print('---------------')
+
+	def test_cont(self):
+		rnd=random.randint(1,len(self.list_rus))
+		print(rnd)
+		try:
+			self.graph_.text_rus.delete('1.0','end')
+			self.graph_.text_rus.insert('1.0',self.list_rus[rnd])
+
+			self.graph_.text_eng.delete('1.0','end')
+			self.graph_.text_eng.insert('1.0',self.list_eng[rnd])
+
+			self.graph_.text_esp.delete('1.0','end')
+			self.graph_.text_esp.insert('1.0',self.list_esp[rnd])
+		except:
+			None
+
+	# def start(self):
+	# 	wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
+	# 	r=0
+	# 	rnd=random.randint(1,len(self.list_rus))
+	# 	for table in wordDoc.tables:
+	# 		for row in table.rows:
+	# 			r+=1
+	# 			if r==rnd:
+	# 				c=0
+	# 				for cell in row.cells:
+	# 					print(rnd)
+	# 					c+=1
+	# 					if c==1:
+	# 						self.graph_.text_rus.delete('1.0','end')
+	# 						self.graph_.text_rus.insert('1.0',cell.text)
+	# 					elif c==2:
+	# 						self.graph_.text_esp.delete('1.0','end')
+	# 						self.graph_.text_esp.insert('1.0',cell.text)
+
+	# 					elif c==3:
+	# 						self.graph_.text_eng.delete('1.0','end')
+	# 						self.graph_.text_eng.insert('1.0',cell.text)
+	# 					else:
+	# 						break
+	# 			else:
+	# 				continue
 
 def main():
 	root=Tk()
