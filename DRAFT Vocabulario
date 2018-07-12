@@ -7,15 +7,17 @@ from tkinter import ttk
 
 class Graph(object):
 	def __init__(self,master):
+		self.backw_count=-1
 		
 		self.master=master
-		self.text_rus=Text(self.master,width=25,height=10,wrap='word')
+		self.master.config(bg='powder blue')
+		self.text_rus=Text(self.master,width=25,height=10,wrap='word',bg='old lace')
 		self.text_rus.place(x=10,y=100)
 
-		self.text_eng=Text(self.master,width=25,height=10,wrap='word')
+		self.text_eng=Text(self.master,width=25,height=10,wrap='word',bg='old lace')
 		self.text_eng.place(x=240,y=100)
 
-		self.text_esp=Text(self.master,width=25,height=10,wrap='word')
+		self.text_esp=Text(self.master,width=25,height=10,wrap='word',bg='old lace')
 		self.text_esp.place(x=470,y=100)
 
 
@@ -25,9 +27,35 @@ class Graph(object):
 			self.master.destroy()
 
 		self.master.bind('<Escape>',lambda e:Esc())
+		self.b_back=Button(self.master,text='<----  Back',command=self.backwards)
+		self.b_back.place(x=10,y=300,width=150)
+
+		self.master.bind('<Return>',lambda e: self.backwards())
 
 		self.wordz=w0rd(self)
 		self.master.bind('<space>',lambda e: self.wordz.test_cont())
+
+		
+
+	
+
+	def backwards(self):
+
+
+
+		try:
+			self.text_rus.delete('1.0','end')
+			self.text_rus.insert('1.0',self.wordz.list_rus[self.wordz.total_count[-2]])
+
+			self.text_eng.delete('1.0','end')
+			self.text_eng.insert('1.0',self.wordz.list_eng[self.wordz.total_count[-2]])
+
+			self.text_esp.delete('1.0','end')
+			self.text_esp.insert('1.0',self.wordz.list_esp[self.wordz.total_count[-2]])
+		except:
+			None
+
+
 
 
 
@@ -37,47 +65,33 @@ class w0rd():
 		self.list_rus=[]
 		self.list_esp=[]
 		self.list_eng=[]
-		k=''
+
+		self.total_count=[]
 
 
 
-		wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/V1.docx')
+
+		wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
 		for table in wordDoc.tables:
 			for row in table.rows:
 				c=[]
 				for cell in row.cells:
-					if c not in [' ','\n']:
+					if c not in [' ','\n',None]:
 						if cell.text not in c:
 							c.append(cell.text)
-				for i in range(len(c)):
-					if i==0:
-						if type(c[i])==type(k):
-							self.list_rus.append(c[i])
-						else:
-							self.list_rus.append('None')
-
-					elif i==1:
-						if type(c[i])==type(k):
-							self.list_rus.append(c[i])
-						else:
-							self.list_rus.append('None')
-					elif i==2:
-						if type(c[i])==type(k):
-							self.list_rus.append(c[i])
-						else:
-							self.list_rus.append('None')
-					else:
-						break
-				print('---------')
-		for i in range(len(self.list_rus)):
-			print('<',self.list_rus[i],'>')
-			print('<',self.list_esp[i],'>')
-			print('<',self.list_eng[i],'>')
-			print('---------------')
+				
+				if len(c)==2:
+					self.list_rus.append(c[0])
+					self.list_eng.append(c[1])
+					self.list_esp.append('None')
+				elif len(c)==3:
+					self.list_rus.append(c[0])
+					self.list_eng.append(c[1])
+					self.list_esp.append(c[2])
 
 	def test_cont(self):
 		rnd=random.randint(1,len(self.list_rus))
-		print(rnd)
+		self.total_count.append(rnd)
 		try:
 			self.graph_.text_rus.delete('1.0','end')
 			self.graph_.text_rus.insert('1.0',self.list_rus[rnd])
@@ -90,36 +104,36 @@ class w0rd():
 		except:
 			None
 
-	# def start(self):
-	# 	wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
-	# 	r=0
-	# 	rnd=random.randint(1,len(self.list_rus))
-	# 	for table in wordDoc.tables:
-	# 		for row in table.rows:
-	# 			r+=1
-	# 			if r==rnd:
-	# 				c=0
-	# 				for cell in row.cells:
-	# 					print(rnd)
-	# 					c+=1
-	# 					if c==1:
-	# 						self.graph_.text_rus.delete('1.0','end')
-	# 						self.graph_.text_rus.insert('1.0',cell.text)
-	# 					elif c==2:
-	# 						self.graph_.text_esp.delete('1.0','end')
-	# 						self.graph_.text_esp.insert('1.0',cell.text)
+	#def start(self):
+		# wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
+		# r=0
+		# rnd=random.randint(1,len(self.list_rus))
+		# for table in wordDoc.tables:
+		# 	for row in table.rows:
+		# 		r+=1
+		# 		if r==rnd:
+		# 			c=0
+		# 			for cell in row.cells:
+		# 				print(rnd)
+		# 				c+=1
+		# 				if c==1:
+		# 					self.graph_.text_rus.delete('1.0','end')
+		# 					self.graph_.text_rus.insert('1.0',cell.text)
+		# 				elif c==2:
+		# 					self.graph_.text_esp.delete('1.0','end')
+		# 					self.graph_.text_esp.insert('1.0',cell.text)
 
-	# 					elif c==3:
-	# 						self.graph_.text_eng.delete('1.0','end')
-	# 						self.graph_.text_eng.insert('1.0',cell.text)
-	# 					else:
-	# 						break
-	# 			else:
-	# 				continue
+		# 				elif c==3:
+		# 					self.graph_.text_eng.delete('1.0','end')
+		# 					self.graph_.text_eng.insert('1.0',cell.text)
+		# 				else:
+		# 					break
+		# 		else:
+		# 			continue
 
 def main():
 	root=Tk()
-	root.geometry('700x450+200+100')
+	root.geometry('700x350+200+100')
 	root.resizable(False,False)
 	new_play=Graph(root)
 	root.mainloop()
