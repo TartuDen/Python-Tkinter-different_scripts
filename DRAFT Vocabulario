@@ -3,138 +3,169 @@ from docx import Document
 import sys
 import random
 from tkinter import *
-from tkinter import ttk 
+from tkinter import ttk
+
 
 class Graph(object):
-	def __init__(self,master):
-		self.backw_count=-1
-		
-		self.master=master
-		self.master.config(bg='powder blue')
-		self.text_rus=Text(self.master,width=25,height=10,wrap='word',bg='old lace')
-		self.text_rus.place(x=10,y=100)
+    def __init__(self, master):
+        self.sel = StringVar()
 
-		self.text_eng=Text(self.master,width=25,height=10,wrap='word',bg='old lace')
-		self.text_eng.place(x=240,y=100)
+        self.master = master
+        self.master.config(bg='powder blue')
+        self.text_rus = Text(self.master, width=25, height=10, wrap='word', bg='old lace')
+        self.text_rus.place(x=10, y=100)
 
-		self.text_esp=Text(self.master,width=25,height=10,wrap='word',bg='old lace')
-		self.text_esp.place(x=470,y=100)
+        self.text_eng = Text(self.master, width=25, height=10, wrap='word', bg='old lace')
+        self.text_eng.place(x=240, y=100)
 
+        self.text_esp = Text(self.master, width=25, height=10, wrap='word', bg='old lace')
+        self.text_esp.place(x=470, y=100)
 
+        def Esc():
+            self.master.destroy()
 
+        self.master.bind('<Escape>', lambda e: Esc())
 
-		def Esc():
-			self.master.destroy()
+        self.wordz = w0rd(self)
+ 
 
-		self.master.bind('<Escape>',lambda e:Esc())
-		self.b_back=Button(self.master,text='<----  Back',command=self.backwards)
-		self.b_back.place(x=10,y=300,width=150)
+        self.b_continue = Button(self.master, text='Continue', command=self.wordz.test_cont)
+        self.b_continue.place(relx=0.01, y=300, width=150)
 
-		self.master.bind('<Return>',lambda e: self.backwards())
+        self.b_back = Button(self.master, text='<---- Back', command=self.backwards)
+        self.b_back.place(relx=0.39, y=300, width=150)
 
-		self.wordz=w0rd(self)
-		self.master.bind('<space>',lambda e: self.wordz.test_cont())
+        self.b_search = Button(self.master, text=' (¬_¬) <SEARCH>  ಠ_ಠ ', command=self.search_)
+        self.b_search.place(relx=0.77, y=300, width=150)
 
-		
+        self.Frase_button = ttk.Checkbutton(self.master, text='Frases')
+        self.Frase_button.place(x=20, y=60)
+        self.Frase_button.config(variable=self.sel, onvalue='True', offvalue='False')
 
-	
+    def search_(self):
+        idx_srch = []
+        s_ch = self.text_rus.get('1.0', 'end')
+        s_ch = s_ch.strip()
+        for words in self.wordz.list_rus:
+            if s_ch in words:
+                idx = self.wordz.list_rus.index(words)
+                idx_srch.append(idx)
+        for words in self.wordz.list_eng:
+            if s_ch in words:
+                idx = self.wordz.list_eng.index(words)
+                idx_srch.append(idx)
 
-	def backwards(self):
+        for words in self.wordz.list_esp:
+            if s_ch in words:
+                idx = self.wordz.list_esp.index(words)
+                idx_srch.append(idx)
 
+        try:
+            self.text_rus.delete('1.0', 'end')
+            self.text_eng.delete('1.0', 'end')
+            self.text_esp.delete('1.0', 'end')
+        except:
+            None
+        count = 1
+        for i in idx_srch:
+            self.text_rus.insert(INSERT, '%d)  ' % count + self.wordz.list_rus[i])
+            self.text_rus.insert(INSERT, '\n ===============\n')
 
+            self.text_eng.insert(INSERT, '%d)  ' % count + self.wordz.list_eng[i])
+            self.text_eng.insert(INSERT, '\n ===============\n')
+            self.text_esp.insert(INSERT, '%d)  ' % count + self.wordz.list_esp[i])
+            self.text_esp.insert(INSERT, '\n ===============\n')
+            count += 1
 
-		try:
-			self.text_rus.delete('1.0','end')
-			self.text_rus.insert('1.0',self.wordz.list_rus[self.wordz.total_count[-2]])
+    def backwards(self):
+        try:
+            self.text_rus.delete('1.0', 'end')
+            self.text_rus.insert('1.0', self.wordz.list_rus[self.wordz.total_count[-2]])
 
-			self.text_eng.delete('1.0','end')
-			self.text_eng.insert('1.0',self.wordz.list_eng[self.wordz.total_count[-2]])
+            self.text_eng.delete('1.0', 'end')
+            self.text_eng.insert('1.0', self.wordz.list_eng[self.wordz.total_count[-2]])
 
-			self.text_esp.delete('1.0','end')
-			self.text_esp.insert('1.0',self.wordz.list_esp[self.wordz.total_count[-2]])
-		except:
-			None
-
-
-
+            self.text_esp.delete('1.0', 'end')
+            self.text_esp.insert('1.0', self.wordz.list_esp[self.wordz.total_count[-2]])
+        except:
+            None
 
 
 class w0rd():
-	def __init__(self,graph_):
-		self.graph_=graph_
-		self.list_rus=[]
-		self.list_esp=[]
-		self.list_eng=[]
+    def __init__(self, graph_):
+        self.graph_ = graph_
+        self.list_rus = []
+        self.list_esp = []
+        self.list_eng = []
 
-		self.total_count=[]
+        self.f_list_rus = []
 
+        self.total_count = []
 
+        #wordDoc = Document(r'C:\Users\Denis\Desktop\IT\PYTHON/Vocabulario_Completo.docx')
+        wordDoc = Document(r'C:\Users\Denis\Desktop\IT\PYTHON/V1.docx')
+        for table in wordDoc.tables:
+            for row in table.rows:
+                c = []
+                for cell in row.cells:
+                    st = ''
+                    if c not in [' ', '\n', None]:
+                        if cell.text not in c:
+                            for (ch) in cell.text:
+                                if ord(ch) in range(65536):
+                                    st = st + ch
 
+                    c.append(st)
 
-		wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
-		for table in wordDoc.tables:
-			for row in table.rows:
-				c=[]
-				for cell in row.cells:
-					if c not in [' ','\n',None]:
-						if cell.text not in c:
-							c.append(cell.text)
-				
-				if len(c)==2:
-					self.list_rus.append(c[0])
-					self.list_eng.append(c[1])
-					self.list_esp.append('None')
-				elif len(c)==3:
-					self.list_rus.append(c[0])
-					self.list_eng.append(c[1])
-					self.list_esp.append(c[2])
+                if len(c) == 2:
+                    self.list_rus.append(c[0])
+                    self.list_eng.append(c[1])
+                    self.list_esp.append('None')
+                elif len(c) == 3:
+                    self.list_rus.append(c[0])
+                    self.list_eng.append(c[1])
+                    self.list_esp.append(c[2])
 
-	def test_cont(self):
-		rnd=random.randint(1,len(self.list_rus))
-		self.total_count.append(rnd)
-		try:
-			self.graph_.text_rus.delete('1.0','end')
-			self.graph_.text_rus.insert('1.0',self.list_rus[rnd])
+        for words in self.list_rus:
+            if 'Frases' in words:
+                try:
+                    n = self.list_rus.index(words)
+                    self.f_list_rus.append(self.list_rus[n])
+                except:
+                    None
 
-			self.graph_.text_eng.delete('1.0','end')
-			self.graph_.text_eng.insert('1.0',self.list_eng[rnd])
+    def test_cont(self):
 
-			self.graph_.text_esp.delete('1.0','end')
-			self.graph_.text_esp.insert('1.0',self.list_esp[rnd])
-		except:
-			None
+        if (self.graph_.sel.get()) == 'True':
+            try:
+                rnd = random.randint(1, len(self.f_list_rus))
+                self.graph_.text_rus.delete('1.0', 'end')
+                self.graph_.text_rus.insert('1.0', self.f_list_rus[rnd])
+            except:
+                None
 
-	#def start(self):
-		# wordDoc=Document(r'C:/Users/Alinka/Desktop/IT/Vocabulario_Completo.docx')
-		# r=0
-		# rnd=random.randint(1,len(self.list_rus))
-		# for table in wordDoc.tables:
-		# 	for row in table.rows:
-		# 		r+=1
-		# 		if r==rnd:
-		# 			c=0
-		# 			for cell in row.cells:
-		# 				print(rnd)
-		# 				c+=1
-		# 				if c==1:
-		# 					self.graph_.text_rus.delete('1.0','end')
-		# 					self.graph_.text_rus.insert('1.0',cell.text)
-		# 				elif c==2:
-		# 					self.graph_.text_esp.delete('1.0','end')
-		# 					self.graph_.text_esp.insert('1.0',cell.text)
+        else:
+            rnd = random.randint(1, len(self.list_rus))
+            self.total_count.append(rnd)
+            try:
+                self.graph_.text_rus.delete('1.0', 'end')
+                self.graph_.text_rus.insert('1.0', self.list_rus[rnd])
 
-		# 				elif c==3:
-		# 					self.graph_.text_eng.delete('1.0','end')
-		# 					self.graph_.text_eng.insert('1.0',cell.text)
-		# 				else:
-		# 					break
-		# 		else:
-		# 			continue
+                self.graph_.text_eng.delete('1.0', 'end')
+                self.graph_.text_eng.insert('1.0', self.list_eng[rnd])
+
+                self.graph_.text_esp.delete('1.0', 'end')
+                self.graph_.text_esp.insert('1.0', self.list_esp[rnd])
+            except:
+                None
 
 def main():
-	root=Tk()
-	root.geometry('700x350+200+100')
-	root.resizable(False,False)
-	new_play=Graph(root)
-	root.mainloop()
+    root = Tk()
+    root.geometry('700x350+200+100')
+    root.resizable(False, False)
+    new_play = Graph(root)
+    root.mainloop()
+
+
 main()
+
