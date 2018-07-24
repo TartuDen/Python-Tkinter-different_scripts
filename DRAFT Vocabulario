@@ -4,6 +4,7 @@ import sys
 import random
 from tkinter import *
 from tkinter import ttk
+import sqlite3
 
 
 class Graph(object):
@@ -26,10 +27,10 @@ class Graph(object):
 
         self.master.bind('<Escape>', lambda e: Esc())
 
-        self.wordz = w0rd(self)
- 
+        self.word_ = W0rd(self)
+        self.f_word = Favorits(self)
 
-        self.b_continue = Button(self.master, text='Continue', command=self.wordz.test_cont)
+        self.b_continue = Button(self.master, text='Continue', command=self.word_.getWord)
         self.b_continue.place(relx=0.01, y=300, width=150)
 
         self.b_back = Button(self.master, text='<---- Back', command=self.backwards)
@@ -42,22 +43,28 @@ class Graph(object):
         self.Frase_button.place(x=20, y=60)
         self.Frase_button.config(variable=self.sel, onvalue='True', offvalue='False')
 
+        self.b_fav_add = Button(self.master, text=' Añadir ', command=None)
+        self.b_fav_add.place(relx=0.75, y=60, width=80)
+
+        self.b_fav_rem = Button(self.master, text=' Quitar ', command=None)
+        self.b_fav_rem.place(relx=0.87, y=60, width=80)
+
     def search_(self):
         idx_srch = []
         s_ch = self.text_rus.get('1.0', 'end')
         s_ch = s_ch.strip()
-        for words in self.wordz.list_rus:
+        for words in self.word_.search_list_rus:
             if s_ch in words:
-                idx = self.wordz.list_rus.index(words)
+                idx = self.word_.search_list_rus.index(words)
                 idx_srch.append(idx)
-        for words in self.wordz.list_eng:
+        for words in self.word_.search_list_eng:
             if s_ch in words:
-                idx = self.wordz.list_eng.index(words)
+                idx = self.word_.search_list_eng.index(words)
                 idx_srch.append(idx)
 
-        for words in self.wordz.list_esp:
+        for words in self.word_.search_list_esp:
             if s_ch in words:
-                idx = self.wordz.list_esp.index(words)
+                idx = self.word_.search_list_esp.index(words)
                 idx_srch.append(idx)
 
         try:
@@ -68,96 +75,107 @@ class Graph(object):
             None
         count = 1
         for i in idx_srch:
-            self.text_rus.insert(INSERT, '%d)  ' % count + self.wordz.list_rus[i])
+            self.text_rus.insert(INSERT, '%d)  ' % count + self.word_.search_list_rus[i])
             self.text_rus.insert(INSERT, '\n ===============\n')
 
-            self.text_eng.insert(INSERT, '%d)  ' % count + self.wordz.list_eng[i])
+            self.text_eng.insert(INSERT, '%d)  ' % count + self.word_.search_list_eng[i])
             self.text_eng.insert(INSERT, '\n ===============\n')
-            self.text_esp.insert(INSERT, '%d)  ' % count + self.wordz.list_esp[i])
+            self.text_esp.insert(INSERT, '%d)  ' % count + self.word_.search_list_esp[i])
             self.text_esp.insert(INSERT, '\n ===============\n')
             count += 1
 
     def backwards(self):
+        self.word_.c.execute("select * from voc_table where rowid=%d" % self.word_.total_count[-2])
+        temp_list = self.word_.c.fetchone()
         try:
             self.text_rus.delete('1.0', 'end')
-            self.text_rus.insert('1.0', self.wordz.list_rus[self.wordz.total_count[-2]])
+            self.text_rus.insert('1.0', temp_list[0])
 
             self.text_eng.delete('1.0', 'end')
-            self.text_eng.insert('1.0', self.wordz.list_eng[self.wordz.total_count[-2]])
+            self.text_eng.insert('1.0', temp_list[1])
 
             self.text_esp.delete('1.0', 'end')
-            self.text_esp.insert('1.0', self.wordz.list_esp[self.wordz.total_count[-2]])
+            self.text_esp.insert('1.0', temp_list[2])
         except:
             None
 
 
-class w0rd():
+class Favorits(object):
     def __init__(self, graph_):
         self.graph_ = graph_
-        self.list_rus = []
-        self.list_esp = []
-        self.list_eng = []
+        self.conn3 = sqlite3.connect('C:/C/V1.db')
+        self.c3 = self.conn3.cursor()
 
-        self.f_list_rus = []
+    def add_(self):
+        print('1')
 
+    def rem_(self):
+        print('2')
+
+
+class W0rd(object):
+    def __init__(self, graph_):
+        self.graph_ = graph_
         self.total_count = []
+        self.conn = sqlite3.connect(r'C:/C/V1.db')
+        self.conn2 = sqlite3.connect(':memory:')
+        self.c = self.conn.cursor()
+        self.c2 = self.conn2.cursor()
+        self.c2.execute("CREATE TABLE fav_words(rus_f,eng_f)")
+        self.search_list_rus = []
+        self.search_list_eng = []
+        self.search_list_esp = []
+        self.c.execute("select *from voc_table")
+        for w in self.c.fetchall():
+            if 'Frases' in w[0]:
+                self.c2.execute("INSERT INTO fav_words VALUES(?,?)", (w[0], w[1]))
 
-        #wordDoc = Document(r'C:\Users\Denis\Desktop\IT\PYTHON/Vocabulario_Completo.docx')
-        wordDoc = Document(r'C:\Users\Denis\Desktop\IT\PYTHON/V1.docx')
-        for table in wordDoc.tables:
-            for row in table.rows:
-                c = []
-                for cell in row.cells:
-                    st = ''
-                    if c not in [' ', '\n', None]:
-                        if cell.text not in c:
-                            for (ch) in cell.text:
-                                if ord(ch) in range(65536):
-                                    st = st + ch
+            if len(w) == 3:
+                self.search_list_rus.append(w[0])
+                self.search_list_eng.append(w[1])
+                self.search_list_esp.append(w[2])
+            elif len(w) == 2:
+                self.search_list_rus.append(w[0])
+                self.search_list_eng.append(w[1])
+                self.search_list_esp.append('None')
+        self.conn.commit()
+        self.conn2.commit()
 
-                    c.append(st)
+    def getWord(self):
+        self.c2.execute("select Count(*) from fav_words")
+        fav_lim = self.c2.fetchall()
+        self.conn2.commit()
 
-                if len(c) == 2:
-                    self.list_rus.append(c[0])
-                    self.list_eng.append(c[1])
-                    self.list_esp.append('None')
-                elif len(c) == 3:
-                    self.list_rus.append(c[0])
-                    self.list_eng.append(c[1])
-                    self.list_esp.append(c[2])
-
-        for words in self.list_rus:
-            if 'Frases' in words:
-                try:
-                    n = self.list_rus.index(words)
-                    self.f_list_rus.append(self.list_rus[n])
-                except:
-                    None
-
-    def test_cont(self):
-
+        self.conn2.commit()
         if (self.graph_.sel.get()) == 'True':
-            try:
-                rnd = random.randint(1, len(self.f_list_rus))
-                self.graph_.text_rus.delete('1.0', 'end')
-                self.graph_.text_rus.insert('1.0', self.f_list_rus[rnd])
-            except:
-                None
-
+            print
+            rnd = random.randint(1, fav_lim[0][0])
+            self.graph_.text_rus.delete('1.0', 'end')
+            self.graph_.text_esp.delete('1.0', 'end')
+            self.graph_.text_eng.delete('1.0', 'end')
+            self.c2.execute("select *from fav_words where rowid=%d" % rnd)
+            f = (self.c2.fetchone())
+            self.graph_.text_rus.insert('1.0', f[0])
         else:
-            rnd = random.randint(1, len(self.list_rus))
+            self.conn2.commit()
+            self.c.execute("select Count(*) from voc_table")
+            self.conn.commit()
+            lim_ = self.c.fetchall()
+            print(lim_[0][0])
+            rnd = random.randint(1, lim_[0][0])
             self.total_count.append(rnd)
+            self.c.execute("select * from voc_table where rowid=%d" % rnd)
+            temp_list = (self.c.fetchone())
             try:
                 self.graph_.text_rus.delete('1.0', 'end')
-                self.graph_.text_rus.insert('1.0', self.list_rus[rnd])
-
+                self.graph_.text_rus.insert('1.0', temp_list[0])
                 self.graph_.text_eng.delete('1.0', 'end')
-                self.graph_.text_eng.insert('1.0', self.list_eng[rnd])
-
+                self.graph_.text_eng.insert('1.0', temp_list[1])
                 self.graph_.text_esp.delete('1.0', 'end')
-                self.graph_.text_esp.insert('1.0', self.list_esp[rnd])
+                self.graph_.text_esp.insert('1.0', temp_list[2])
             except:
                 None
+
 
 def main():
     root = Tk()
