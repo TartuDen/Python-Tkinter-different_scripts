@@ -10,6 +10,7 @@ import sqlite3
 class Graph(object):
     def __init__(self, master):
         self.sel = StringVar()
+        self.fav_sel = StringVar()
 
         self.master = master
         self.master.config(bg='powder blue')
@@ -43,10 +44,14 @@ class Graph(object):
         self.Frase_button.place(x=20, y=60)
         self.Frase_button.config(variable=self.sel, onvalue='True', offvalue='False')
 
-        self.b_fav_add = Button(self.master, text=' Añadir ', command=None)
+        self.Fav_button = ttk.Checkbutton(self.master, text='Favoritos')
+        self.Fav_button.place(x=450, y=60)
+        self.Fav_button.config(variable=self.fav_sel, onvalue='True', offvalue='False')
+
+        self.b_fav_add = Button(self.master, text=' Añadir ', command=self.f_word.add_)
         self.b_fav_add.place(relx=0.75, y=60, width=80)
 
-        self.b_fav_rem = Button(self.master, text=' Quitar ', command=None)
+        self.b_fav_rem = Button(self.master, text=' Quitar ', command=self.f_word.rem_)
         self.b_fav_rem.place(relx=0.87, y=60, width=80)
 
     def search_(self):
@@ -103,32 +108,43 @@ class Graph(object):
 class Favorits(object):
     def __init__(self, graph_):
         self.graph_ = graph_
-        self.conn3 = sqlite3.connect('C:/C/V1.db')
+        self.conn3 = sqlite3.connect('C:/C/V2.db')
         self.c3 = self.conn3.cursor()
 
     def add_(self):
-        print('1')
+        to_add_rus = self.graph_.text_rus.get('1.0', 'end')
+        to_add_eng = self.graph_.text_eng.get('1.0', 'end')
+        to_add_esp = self.graph_.text_esp.get('1.0', 'end')
+        self.c3.execute("INSERT INTO fav VALUES(?,?,?)", (to_add_rus, to_add_eng, to_add_esp))
+        self.conn3.commit()
 
     def rem_(self):
-        print('2')
+        to_rem_rus = self.graph_.text_rus.get('1.0', 'end')
+        to_rem_rus = to_rem_rus.strip('\n')
+        idx = (self.graph_.word_.rnd_fav)
+        self.c3.execute("DELETE FROM fav WHERE rowid=%d" % idx)
+        self.conn3.commit()
 
 
 class W0rd(object):
     def __init__(self, graph_):
+        self.rnd_fav = 0
         self.graph_ = graph_
         self.total_count = []
         self.conn = sqlite3.connect(r'C:/C/V1.db')
-        self.conn2 = sqlite3.connect(':memory:')
+        self.conn_frases = sqlite3.connect(':memory:')
+        self.conn_favorits = sqlite3.connect('C:/C/V2.db')
         self.c = self.conn.cursor()
-        self.c2 = self.conn2.cursor()
-        self.c2.execute("CREATE TABLE fav_words(rus_f,eng_f)")
+        self.c_frases = self.conn_frases.cursor()
+        self.c_frases.execute("CREATE TABLE frases_words(rus_f,eng_f)")
+        self.c_favorits = self.conn_favorits.cursor()
         self.search_list_rus = []
         self.search_list_eng = []
         self.search_list_esp = []
         self.c.execute("select *from voc_table")
         for w in self.c.fetchall():
             if 'Frases' in w[0]:
-                self.c2.execute("INSERT INTO fav_words VALUES(?,?)", (w[0], w[1]))
+                self.c_frases.execute("INSERT INTO frases_words VALUES(?,?)", (w[0], w[1]))
 
             if len(w) == 3:
                 self.search_list_rus.append(w[0])
@@ -139,25 +155,49 @@ class W0rd(object):
                 self.search_list_eng.append(w[1])
                 self.search_list_esp.append('None')
         self.conn.commit()
-        self.conn2.commit()
+        self.conn_frases.commit()
 
     def getWord(self):
-        self.c2.execute("select Count(*) from fav_words")
-        fav_lim = self.c2.fetchall()
-        self.conn2.commit()
 
-        self.conn2.commit()
         if (self.graph_.sel.get()) == 'True':
-            print
-            rnd = random.randint(1, fav_lim[0][0])
+            self.c_frases.execute("SELECT Count(*) FROM frases_words")
+            frase_lim = self.c_frases.fetchall()
+            rnd = random.randint(1, frase_lim[0][0])
             self.graph_.text_rus.delete('1.0', 'end')
             self.graph_.text_esp.delete('1.0', 'end')
             self.graph_.text_eng.delete('1.0', 'end')
-            self.c2.execute("select *from fav_words where rowid=%d" % rnd)
-            f = (self.c2.fetchone())
+            self.c_frases.execute("select *from frases_words where rowid=%d" % rnd)
+            f = (self.c_frases.fetchone())
             self.graph_.text_rus.insert('1.0', f[0])
+            self.conn_frases.commit()
+        elif (self.graph_.fav_sel.get()) == 'True':
+            self.c_favorits.execute("SELECT Count(*) FROM fav")
+            fav_lim = self.c_favorits.fetchall()
+            fav_lim = fav_lim[0][0]
+            print('Limit: ', fav_lim)
+            self.rnd_fav = random.randint(1, fav_lim)
+            print('rnd: ', self.rnd_fav)
+            self.graph_.text_rus.delete('1.0', 'end')
+            self.graph_.text_esp.delete('1.0', 'end')
+            self.graph_.text_eng.delete('1.0', 'end')
+
+            self.c_favorits.execute("select *from fav where rowid=%d" % self.rnd_fav)
+            f = self.c_favorits.fetchone()
+
+            print('f: ', f)
+
+            if len(f) == 3:
+                self.graph_.text_rus.insert('1.0', f[0])
+                self.graph_.text_eng.insert('1.0', f[1])
+                self.graph_.text_esp.insert('1.0', f[2])
+            elif len(f) == 2:
+                self.graph_.text_rus.insert('1.0', f[0])
+                self.graph_.text_eng.insert('1.0', f[1])
+                self.graph_.text_esp.insert('1.0', 'None')
+            self.conn_favorits.commit()
+
         else:
-            self.conn2.commit()
+            self.conn_frases.commit()
             self.c.execute("select Count(*) from voc_table")
             self.conn.commit()
             lim_ = self.c.fetchall()
