@@ -26,12 +26,15 @@ class Graph(object):
 
         self.word_ = W0rd(self)
         self.f_word = Favorits(self)
+        self.edit_ = Edit_(self)
 
         self.master.protocol("WM_DELETE_WINDOW", self.f_word.on_closing)
         self.master.bind('<Escape>', lambda e: self.f_word.on_closing())
 
         self.b_continue = Button(self.master, text='Continue', command=self.word_.getWord)
         self.b_continue.place(relx=0.01, y=300, width=150)
+
+        self.text_rus.bind('<Double-Button-1>', lambda e: self.word_.getWord())
 
         self.b_back = Button(self.master, text='<---- Back', command=self.backwards)
         self.b_back.place(relx=0.39, y=300, width=150)
@@ -53,14 +56,21 @@ class Graph(object):
         self.b_fav_rem = Button(self.master, text=' Quitar ', command=self.f_word.rem_)
         self.b_fav_rem.place(relx=0.87, y=60, width=80)
 
+        self.edit_esp_button = Button(self.text_esp, text=' editar ', command=self.edit_.edit_esp)
+        self.edit_esp_button.place(relx=0.9, x=-30, rely=0.9, y=-10, width=50)
+
+        self.edit_eng_button = Button(self.text_eng, text=' editar ', command=self.edit_.edit_eng)
+        self.edit_eng_button.place(relx=0.9, x=-30, rely=0.9, y=-10, width=50)
+
     def search_(self):
         idx_srch = []
         s_ch = self.text_rus.get('1.0', 'end')
         s_ch = s_ch.strip()
         for words in self.word_.search_list_rus:
-            if s_ch in words:
-                idx = self.word_.search_list_rus.index(words)
-                idx_srch.append(idx)
+            if 'Frases' not in words:
+                if s_ch in words:
+                    idx = self.word_.search_list_rus.index(words)
+                    idx_srch.append(idx)
         for words in self.word_.search_list_eng:
             if s_ch in words:
                 idx = self.word_.search_list_eng.index(words)
@@ -104,6 +114,27 @@ class Graph(object):
             None
 
 
+class Edit_(object):
+    def __init__(self, graph_):
+        self.graph_ = graph_
+
+    def edit_eng(self):
+        to_modif_eng = (self.graph_.text_eng.get('1.0', 'end'))
+        idx = (self.graph_.word_.rnd_for_continue)
+        conn = sqlite3.connect('C:/C/V1.db')
+        c = conn.cursor()
+        c.execute("UPDATE voc_table SET eng_=? WHERE rowid=?", (to_modif_eng, idx))
+        conn.commit()
+
+    def edit_esp(self):
+        to_modif_esp = (self.graph_.text_esp.get('1.0', 'end'))
+        idx = (self.graph_.word_.rnd_for_continue)
+        conn = sqlite3.connect('C:/C/V1.db')
+        c = conn.cursor()
+        c.execute("UPDATE voc_table SET esp_=? WHERE rowid=?", (to_modif_esp, idx))
+        conn.commit()
+
+
 class Favorits(object):
     def __init__(self, graph_):
         self.fav_list = []
@@ -139,6 +170,7 @@ class Favorits(object):
 
 class W0rd(object):
     def __init__(self, graph_):
+        self.rnd_for_continue = 0
         self.rnd_fav = 0
         self.f_0_to_remove = []
         self.graph_ = graph_
@@ -201,11 +233,12 @@ class W0rd(object):
 
         else:
             self.c.execute("select Count(*) from voc_table")
-            self.conn.commit()
+            # self.conn.commit()
             lim_ = self.c.fetchall()
-            rnd = random.randint(1, lim_[0][0])
-            self.total_count.append(rnd)
-            self.c.execute("select * from voc_table where rowid=%d" % rnd)
+            self.rnd_for_continue = random.randint(1, lim_[0][0])
+            print(lim_[0][0], ' - ', self.rnd_for_continue)
+            self.total_count.append(self.rnd_for_continue)
+            self.c.execute("select * from voc_table where rowid=%d" % self.rnd_for_continue)
             temp_list = (self.c.fetchone())
             try:
                 self.graph_.text_rus.delete('1.0', 'end')
