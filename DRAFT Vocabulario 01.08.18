@@ -6,6 +6,85 @@ from tkinter import *
 from tkinter import ttk
 import sqlite3
 from tkinter import messagebox
+# search mayusculas y menusculas
+# check the new table and compare with the old one
+
+
+class Create_check_db(object):
+
+    def Create(self):
+        self.conn1 = sqlite3.connect(r'C:/C/V1.db')
+        self.c1 = conn1.cursor()
+        self.c1.execute("SELECT Count(*) FROM voc_table")
+        v1_count = self.c1.fetchall()
+        v1_count = v1_count[0][0]
+
+        self.conn2.sqlite3.connect(r'C:/C/V_check.db')
+        self.c2 = self.conn2.cursor()
+
+        self.c2.execute("""CREATE TABLE voc_table(
+        id_ integer,
+        rus_ text,
+        eng_ text,
+        esp_ text)""")
+
+        idx = 0
+
+        wordDoc = Document(r'C:\Users\Denis\Desktop\IT\PYTHON\Vocabulario_Completo.docx')
+        for table in wordDoc.tables:
+            for row in table.rows:
+                list_ = []
+
+                for cell in row.cells:
+                    temp_ = ''
+                    for ch in cell.text:
+                        if ord(ch) in range(65000):
+                            temp_ = temp_ + ch
+
+                    try:
+                        list_.append(temp_)
+                    except:
+                        None
+                if len(list_) == 3:
+                    c.execute("INSERT INTO voc_table VALUES (?,?,?,?)", (idx, list_[0], list_[1], list_[2]))
+                    idx += 1
+                elif len(list_) == 2:
+                    c.execute("INSERT INTO voc_table VALUES (?,?,?,?)", (idx, list_[0], list_[1], 'None'))
+                    idx += 1
+                conn.commit()
+
+    def Check_Combine_db(self):
+        conn = sqlite3.connect('C:/C/V1.db')
+        c = conn.cursor()
+        conn2 = sqlite3.connect('C:/C/V3.db')
+        c2 = conn2.cursor()
+        c.execute("SELECT* FROM voc_table")
+        c2.execute("SELECT* FROM voc_table")
+        list_to1 = []
+        list_to2 = []
+        total = []
+        for st in c.fetchall():
+            list_to1.append(st)
+
+        for st in c2.fetchall():
+            list_to2.append(st)
+        for ln2 in list_to2:
+            match = False
+            for ln1 in list_to1:
+                if ln1[1] == ln2[1]:
+                    match = True
+                    break
+            if match == False:
+                total.append(ln2)
+
+        print('Lines were changed: ', total)
+        for st in total:
+            if len(st) == 4:
+                c.execute("INSERT INTO voc_table VALUES(?,?,?,?)", (st[0], st[1], st[2], st[3]))
+            elif len(st) == 3:
+                c.execute("INSERT INTO voc_table VALUES(?,?,?,?)", (st[0], st[1], st[2], 'To be added'))
+        conn.commit()
+        conn2.commit()
 
 
 class Graph(object):
@@ -262,4 +341,5 @@ def main():
 
 
 main()
+
 
