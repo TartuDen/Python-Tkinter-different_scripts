@@ -7,30 +7,29 @@ from tkinter import ttk
 import sqlite3
 from tkinter import messagebox
 # search mayusculas y menusculas
-# check the new table and compare with the old one
+# check the new table and compare with the old one -DONE
 
 
 class Create_check_db(object):
+    def __init__(self, loc_V1, loc_V3, loc_Voc_comp):
+        self.loc_V1 = loc_V1
+        self.loc_V3 = loc_V3
+        self.loc_Voc_comp = loc_Voc_comp
+        # self.Create()  # - update DB
+        # self.Check_Combine_db()
 
     def Create(self):
-        self.conn1 = sqlite3.connect(r'C:/C/V1.db')
-        self.c1 = conn1.cursor()
-        self.c1.execute("SELECT Count(*) FROM voc_table")
-        v1_count = self.c1.fetchall()
-        v1_count = v1_count[0][0]
+        conn = sqlite3.connect(self.loc_V3)
+        c = conn.cursor()
 
-        self.conn2.sqlite3.connect(r'C:/C/V_check.db')
-        self.c2 = self.conn2.cursor()
-
-        self.c2.execute("""CREATE TABLE voc_table(
+        c.execute("""CREATE TABLE voc_table(
         id_ integer,
         rus_ text,
         eng_ text,
         esp_ text)""")
-
         idx = 0
 
-        wordDoc = Document(r'C:\Users\Denis\Desktop\IT\PYTHON\Vocabulario_Completo.docx')
+        wordDoc = Document(self.loc_Voc_comp)
         for table in wordDoc.tables:
             for row in table.rows:
                 list_ = []
@@ -54,9 +53,9 @@ class Create_check_db(object):
                 conn.commit()
 
     def Check_Combine_db(self):
-        conn = sqlite3.connect('C:/C/V1.db')
+        conn = sqlite3.connect(self.loc_V1)
         c = conn.cursor()
-        conn2 = sqlite3.connect('C:/C/V3.db')
+        conn2 = sqlite3.connect(self.loc_V3)
         c2 = conn2.cursor()
         c.execute("SELECT* FROM voc_table")
         c2.execute("SELECT* FROM voc_table")
@@ -147,16 +146,16 @@ class Graph(object):
         s_ch = s_ch.strip()
         for words in self.word_.search_list_rus:
             if 'Frases' not in words:
-                if s_ch in words:
+                if (s_ch in words) or (s_ch.title() in words):
                     idx = self.word_.search_list_rus.index(words)
                     idx_srch.append(idx)
         for words in self.word_.search_list_eng:
-            if s_ch in words:
+            if (s_ch in words) or (s_ch.title() in words):
                 idx = self.word_.search_list_eng.index(words)
                 idx_srch.append(idx)
 
         for words in self.word_.search_list_esp:
-            if s_ch in words:
+            if (s_ch in words) or (s_ch.title() in words):
                 idx = self.word_.search_list_esp.index(words)
                 idx_srch.append(idx)
 
@@ -331,6 +330,11 @@ class W0rd(object):
 
 
 def main():
+    location_V1 = r'C:/C/V1.db'
+    location_V3 = r'C:/C/V3.db'
+    location_Voc_Compl = r'C:\Users\Denis\Desktop\IT\PYTHON\Vocabulario_Completo.docx'
+    create_V3_combine_V3_with_V1 = Create_check_db(location_V1, location_V3, location_Voc_Compl)
+
     root = Tk()
 
     root.geometry('700x350+200+100')
@@ -341,5 +345,3 @@ def main():
 
 
 main()
-
-
