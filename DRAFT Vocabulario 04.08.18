@@ -6,8 +6,9 @@ from tkinter import *
 from tkinter import ttk
 import sqlite3
 from tkinter import messagebox
-# search mayusculas y menusculas
+# search mayusculas y menusculas -DONE
 # check the new table and compare with the old one -DONE
+# possibility to add new lines - in progress
 
 
 class Create_check_db(object):
@@ -90,16 +91,17 @@ class Graph(object):
     def __init__(self, master):
         self.sel = StringVar()
         self.fav_sel = StringVar()
+        self.goBack = StringVar()
 
         self.master = master
         self.master.config(bg='powder blue')
-        self.text_rus = Text(self.master, width=25, height=10, wrap='word', bg='old lace')
+        self.text_rus = Text(self.master, width=25, height=15, wrap='word', bg='old lace')
         self.text_rus.place(x=10, y=100)
 
-        self.text_eng = Text(self.master, width=25, height=10, wrap='word', bg='old lace')
+        self.text_eng = Text(self.master, width=25, height=15, wrap='word', bg='old lace')
         self.text_eng.place(x=240, y=100)
 
-        self.text_esp = Text(self.master, width=25, height=10, wrap='word', bg='old lace')
+        self.text_esp = Text(self.master, width=25, height=15, wrap='word', bg='old lace')
         self.text_esp.place(x=470, y=100)
 
         self.word_ = W0rd(self)
@@ -110,19 +112,23 @@ class Graph(object):
         self.master.bind('<Escape>', lambda e: self.f_word.on_closing())
 
         self.b_continue = Button(self.master, text='Continue', command=self.word_.getWord)
-        self.b_continue.place(relx=0.01, y=300, width=150)
+        self.b_continue.place(relx=0.01, y=400, width=150)
 
         self.text_rus.bind('<Double-Button-1>', lambda e: self.word_.getWord())
 
-        self.b_back = Button(self.master, text='<---- Back', command=self.backwards)
-        self.b_back.place(relx=0.39, y=300, width=150)
+        # self.b_back = Button(self.master, text='<---- Back', command=self.backwards)
+        # self.b_back.place(relx=0.39, y=400, width=150)
 
         self.b_search = Button(self.master, text=' (¬_¬) <SEARCH>  ಠ_ಠ ', command=self.search_)
-        self.b_search.place(relx=0.77, y=300, width=150)
+        self.b_search.place(relx=0.77, y=400, width=150)
 
         self.Frase_button = ttk.Checkbutton(self.master, text='Frases')
         self.Frase_button.place(x=20, y=60)
         self.Frase_button.config(variable=self.sel, onvalue='True', offvalue='False')
+
+        self.Back_checkbox = ttk.Checkbutton(self.master, text='GoBack')
+        self.Back_checkbox.place(x=20, y=37)
+        self.Back_checkbox.config(variable=self.goBack, onvalue='True', offvalue='False')
 
         self.Fav_button = ttk.Checkbutton(self.master, text='Favoritos')
         self.Fav_button.place(x=450, y=60)
@@ -135,10 +141,10 @@ class Graph(object):
         self.b_fav_rem.place(relx=0.87, y=60, width=80)
 
         self.edit_esp_button = Button(self.text_esp, text=' editar ', command=self.edit_.edit_esp)
-        self.edit_esp_button.place(relx=0.9, x=-30, rely=0.9, y=-10, width=50)
+        self.edit_esp_button.place(relx=0.9, x=-30, rely=0.94, y=-10, width=50)
 
         self.edit_eng_button = Button(self.text_eng, text=' editar ', command=self.edit_.edit_eng)
-        self.edit_eng_button.place(relx=0.9, x=-30, rely=0.9, y=-10, width=50)
+        self.edit_eng_button.place(relx=0.9, x=-30, rely=0.94, y=-10, width=50)
 
     def search_(self):
         idx_srch = []
@@ -198,7 +204,12 @@ class Edit_(object):
 
     def edit_eng(self):
         to_modif_eng = (self.graph_.text_eng.get('1.0', 'end'))
-        idx = (self.graph_.word_.rnd_for_continue)
+        if self.graph_.word_.rnd_for_continue == self.graph_.word_.total_count[self.graph_.word_.ind_backwards]:
+            idx = (self.graph_.word_.rnd_for_continue)
+            print('eng if: ', idx)
+        else:
+            idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
+            print('eng else: ', idx)
         conn = sqlite3.connect('C:/C/V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET eng_=? WHERE rowid=?", (to_modif_eng, idx))
@@ -206,7 +217,13 @@ class Edit_(object):
 
     def edit_esp(self):
         to_modif_esp = (self.graph_.text_esp.get('1.0', 'end'))
-        idx = (self.graph_.word_.rnd_for_continue)
+        if self.graph_.word_.rnd_for_continue == self.graph_.word_.total_count[self.graph_.word_.ind_backwards]:
+            idx = (self.graph_.word_.rnd_for_continue)
+            print('esp if: ', idx)
+        else:
+            idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
+            print('esp else: ', idx)
+
         conn = sqlite3.connect('C:/C/V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET esp_=? WHERE rowid=?", (to_modif_esp, idx))
@@ -249,6 +266,7 @@ class Favorits(object):
 class W0rd(object):
     def __init__(self, graph_):
         self.rnd_for_continue = 0
+        self.ind_backwards = -1
         self.rnd_fav = 0
         self.f_0_to_remove = []
         self.graph_ = graph_
@@ -309,13 +327,31 @@ class W0rd(object):
                 self.graph_.text_eng.insert('1.0', self.graph_.f_word.fav_list[rnd][2])
                 self.graph_.text_esp.insert('1.0', 'None')
 
+        elif (self.graph_.goBack.get()) == 'True':
+            self.c.execute("select * from voc_table where rowid=%d" % self.total_count[self.ind_backwards])
+            self.ind_backwards = self.ind_backwards - 1
+            print('back: ', self.total_count[self.ind_backwards])
+            temp_list = self.c.fetchone()
+            try:
+                self.graph_.text_rus.delete('1.0', 'end')
+                self.graph_.text_rus.insert('1.0', temp_list[1])
+
+                self.graph_.text_eng.delete('1.0', 'end')
+                self.graph_.text_eng.insert('1.0', temp_list[2])
+
+                self.graph_.text_esp.delete('1.0', 'end')
+                self.graph_.text_esp.insert('1.0', temp_list[3])
+            except:
+                None
+
         else:
+            self.ind_backwards = -1
             self.c.execute("select Count(*) from voc_table")
-            # self.conn.commit()
             lim_ = self.c.fetchall()
             self.rnd_for_continue = random.randint(1, lim_[0][0])
             print(lim_[0][0], ' - ', self.rnd_for_continue)
             self.total_count.append(self.rnd_for_continue)
+            print('straight: ', self.total_count)
             self.c.execute("select * from voc_table where rowid=%d" % self.rnd_for_continue)
             temp_list = (self.c.fetchone())
             try:
@@ -337,7 +373,7 @@ def main():
 
     root = Tk()
 
-    root.geometry('700x350+200+100')
+    root.geometry('700x450+200+100')
     root.resizable(False, False)
     new_play = Graph(root)
 
@@ -345,3 +381,4 @@ def main():
 
 
 main()
+
