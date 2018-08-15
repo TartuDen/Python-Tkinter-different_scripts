@@ -6,6 +6,12 @@ from tkinter import *
 from tkinter import ttk
 import sqlite3
 from tkinter import messagebox
+from googletrans import Translator
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from PyDictionary import PyDictionary
+from tkinter import colorchooser
+import math
 # search mayusculas y menusculas -DONE
 # check the new table and compare with the old one -DONE
 # possibility to add new lines - in progress
@@ -87,11 +93,115 @@ class Create_check_db(object):
         conn2.commit()
 
 
+class Select_text(object):
+    def __init__(self, graph_):
+        self.graph_ = graph_
+        self.translator = Translator()
+        self.vocab = PyDictionary()
+
+    def method_rus_esp(self):
+        selected = self.graph_.text_rus.get(SEL_FIRST, SEL_LAST)
+        transl_from_rus_esp = self.translator.translate(selected, dest='es')
+        self.graph_.text_esp.insert(INSERT, '\n\n%s' % transl_from_rus_esp.text)
+
+    def method_eng_esp(self):
+        selected = self.graph_.text_eng.get(SEL_FIRST, SEL_LAST)
+        transl_from_eng_esp = self.translator.translate(selected, dest='es')
+        self.graph_.text_esp.insert(INSERT, '\n\n%s' % transl_from_eng_esp.text)
+        # self.getBrowser(selected)
+        meaning = self.vocab.meaning(selected)
+        try:
+            self.graph_.text_eng.insert('end', '\n\n')
+            self.graph_.text_eng.insert('end', '--------------')
+            self.graph_.text_eng.insert('end', '\n')
+            self.graph_.text_eng.insert('end', 'Noun:  ')
+            self.graph_.text_eng.insert('end', meaning['Noun'])
+            self.graph_.text_eng.insert('end', '\n\n')
+            self.graph_.text_eng.insert('end', '--------------')
+            self.graph_.text_eng.insert('end', '\n')
+            self.graph_.text_eng.insert('end', 'Verb:  ')
+            self.graph_.text_eng.insert('end', meaning['Verb'])
+            self.graph_.text_eng.insert('end', '\n\n')
+            self.graph_.text_eng.insert('end', '--------------')
+            self.graph_.text_eng.insert('end', '\n')
+            self.graph_.text_eng.insert('end', 'Adjective:  ')
+            self.graph_.text_eng.insert('end', meaning['Adjective'])
+        except:
+            pass
+
+    def getBrowser(self, selected):
+        driver = webdriver.Chrome()
+        driver.get(r'https://translate.google.com/?hl=es')
+        text_form = driver.find_element_by_id('source')
+        text_form.send_keys(selected)
+        text_form.send_keys(Keys.RETURN)
+        all_elements = driver.find_elements_by_xpath("//*[@id]")
+        for i in all_elements:
+            if 'Traducciones' in i.text:
+                match = i.text
+                break
+        try:
+            match = match.split(' ')
+        except:
+            print('no words')
+        defin = ''
+        trad = ''
+        t = False
+        d = False
+        inf = False
+        ver = False
+        for i in range(len(match)):
+            if 'Definiciones' in match[i]:
+                d = True
+                continue
+            if 'Traducciones' in match[i]:
+                t = True
+                d = False
+                continue
+            if 'Información' in match[i]:
+                t = False
+                d = False
+
+            if d:
+                defin = defin + match[i] + ' '
+            elif t:
+                trad = trad + match[i] + ' '
+
+        list_def = []
+        list_trad = []
+
+        defin = defin.split('\n')
+        trad = trad.split('\n')
+        a = 0
+        for w in defin:
+            if 'definiciones' in w:
+                break
+
+            if len(w):
+                a += 1
+                if a >= 2:
+                    print(w)
+
+        print('----------')
+        b = 0
+        new_list = []
+        for w in trad:
+            if len(w):
+                b += 1
+                if b >= 2:
+                    print(w.replace('\n', ' '))
+
+        driver.close()
+
+
 class Graph(object):
     def __init__(self, master):
+
+        self.color = 0
         self.sel = StringVar()
         self.fav_sel = StringVar()
         self.goBack = StringVar()
+        self.Color_select = StringVar()
 
         self.master = master
         self.master.config(bg='powder blue')
@@ -107,6 +217,7 @@ class Graph(object):
         self.word_ = W0rd(self)
         self.f_word = Favorits(self)
         self.edit_ = Edit_(self)
+        self.sel_txt = Select_text(self)
 
         self.master.protocol("WM_DELETE_WINDOW", self.f_word.on_closing)
         self.master.bind('<Escape>', lambda e: self.f_word.on_closing())
@@ -116,11 +227,20 @@ class Graph(object):
 
         self.text_rus.bind('<Double-Button-1>', lambda e: self.word_.getWord())
 
+        self.color_combo = ttk.Combobox(self.master, textvariable=self.Color_select,values=('Blue','Green','Red','White'))
+        self.color_combo.place(relx=0.01, rely=0.01)
+
         # self.b_back = Button(self.master, text='<---- Back', command=self.backwards)
         # self.b_back.place(relx=0.39, y=400, width=150)
 
+        self.master.bind('<F1>', lambda e: self.sel_txt.method_rus_esp())
+        self.master.bind('<F2>', lambda e: self.sel_txt.method_eng_esp())
+
         self.b_search = Button(self.master, text=' (¬_¬) <SEARCH>  ಠ_ಠ ', command=self.search_)
         self.b_search.place(relx=0.77, y=400, width=150)
+
+        self.b_color = Button(self.master, text='_color_', command=self.color_apply)
+        self.b_color.place(relx=0.35, y=400, width=150)
 
         self.Frase_button = ttk.Checkbutton(self.master, text='Frases')
         self.Frase_button.place(x=20, y=60)
@@ -140,11 +260,8 @@ class Graph(object):
         self.b_fav_rem = Button(self.master, text=' Quitar ', command=self.f_word.rem_)
         self.b_fav_rem.place(relx=0.87, y=60, width=80)
 
-        self.edit_esp_button = Button(self.text_esp, text=' editar ', command=self.edit_.edit_esp)
+        self.edit_esp_button = Button(self.text_esp, text=' editar ', command=self.edit_.generic_func)
         self.edit_esp_button.place(relx=0.9, x=-30, rely=0.94, y=-10, width=50)
-
-        self.edit_eng_button = Button(self.text_eng, text=' editar ', command=self.edit_.edit_eng)
-        self.edit_eng_button.place(relx=0.9, x=-30, rely=0.94, y=-10, width=50)
 
     def search_(self):
         idx_srch = []
@@ -182,25 +299,60 @@ class Graph(object):
             self.text_esp.insert(INSERT, '\n ===============\n')
             count += 1
 
-    def backwards(self):
-        self.word_.c.execute("select * from voc_table where rowid=%d" % self.word_.total_count[-2])
-        temp_list = self.word_.c.fetchone()
-        try:
-            self.text_rus.delete('1.0', 'end')
-            self.text_rus.insert('1.0', temp_list[1])
+    def color_apply(self):
 
-            self.text_eng.delete('1.0', 'end')
-            self.text_eng.insert('1.0', temp_list[2])
+        #'Blue' - '#46a3ff','Green' - '#00c100','Red' - '#ff4242','White' - '#ffffff'
+        #self.color = colorchooser.askcolor(initialcolor='#FFFFFF')  # this opens the color table
 
-            self.text_esp.delete('1.0', 'end')
-            self.text_esp.insert('1.0', temp_list[3])
-        except:
-            None
+
+
+
+        if self.Color_select.get()=='Blue':
+            sel_first_index=(self.text_rus.index(SEL_FIRST))
+            self.text_rus.insert(sel_first_index,'[')
+            sel_last_index=(self.text_rus.index(SEL_LAST))
+            self.text_rus.insert(sel_last_index,'´´')
+            self.text_rus.tag_add('blue',sel_first_index,sel_last_index)
+
+
+
+
+        elif self.Color_select.get()=='Green':
+            sel_first_index=(self.text_rus.index(SEL_FIRST))
+            self.text_rus.insert(sel_first_index,'´')
+            sel_last_index=(self.text_rus.index(SEL_LAST))
+            self.text_rus.insert(sel_last_index,'´')
+            self.text_rus.tag_add('green',sel_first_index,sel_last_index)
+
+
+        self.text_rus.tag_config('blue',background='lightblue',foreground='black')
+        self.text_rus.tag_config('green',background='lightgreen',foreground='black')
+
+
+
 
 
 class Edit_(object):
     def __init__(self, graph_):
         self.graph_ = graph_
+
+    def generic_func(self):
+        self.edit_rus()
+        self.edit_eng()
+        self.edit_esp()
+
+    def edit_rus(self):
+        to_modif_rus = (self.graph_.text_rus.get('1.0', 'end'))
+        if self.graph_.word_.rnd_for_continue == self.graph_.word_.total_count[self.graph_.word_.ind_backwards]:
+            idx = (self.graph_.word_.rnd_for_continue)
+            print('rus if: ', idx)
+        else:
+            idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
+            print('rus else: ', idx)
+        conn = sqlite3.connect('C:/C/V1.db')
+        c = conn.cursor()
+        c.execute("UPDATE voc_table SET rus_=? WHERE rowid=?", (to_modif_rus, idx))
+        conn.commit()
 
     def edit_eng(self):
         to_modif_eng = (self.graph_.text_eng.get('1.0', 'end'))
@@ -328,8 +480,9 @@ class W0rd(object):
                 self.graph_.text_esp.insert('1.0', 'None')
 
         elif (self.graph_.goBack.get()) == 'True':
-            self.c.execute("select * from voc_table where rowid=%d" % self.total_count[self.ind_backwards])
             self.ind_backwards = self.ind_backwards - 1
+            self.c.execute("select * from voc_table where rowid=%d" % self.total_count[self.ind_backwards])
+
             print('back: ', self.total_count[self.ind_backwards])
             temp_list = self.c.fetchone()
             try:
@@ -354,6 +507,9 @@ class W0rd(object):
             print('straight: ', self.total_count)
             self.c.execute("select * from voc_table where rowid=%d" % self.rnd_for_continue)
             temp_list = (self.c.fetchone())
+            for str_ in temp_list:
+                if '[' in str_:
+
             try:
                 self.graph_.text_rus.delete('1.0', 'end')
                 self.graph_.text_rus.insert('1.0', temp_list[1])
