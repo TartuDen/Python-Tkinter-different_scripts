@@ -1,0 +1,169 @@
+import pyautogui as pg
+import time
+import webbrowser
+import sys
+import random
+
+pg.FAILSAFE = True
+
+
+class Filling_form(object):
+    def __init__(self, name, info_):
+        self.name = name
+        self.info_ = info_
+
+        print(self.name)
+        print(self.info_)
+        webbrowser.open_new('https://docs.google.com/forms/d/e/1FAIpQLScSVDFU76rZvbO_tiIwSt6d9sOK0CZyS9KKMCP6cP5O5W5lVQ/viewform')
+        time.sleep(1)
+        pos = pg.locateOnScreen('C:/C/pyautogui/expand.png')
+        if pos:
+            cent = pg.center(pos)
+            pg.click(cent)
+        self.Generic()
+
+    def Generic(self):
+        time.sleep(0.2)
+
+        for i in range(1, 4):
+            pos = pg.locateOnScreen('C:/C/pyautogui/GenericForm.png')
+            if pos:
+                break
+            else:
+                if i % 2 == 0:
+                    pg.scroll(-1000)
+                else:
+                    pg.scroll(1000)
+        self.Name()
+
+    def Name(self):
+        time.sleep(0.2)
+        for i in range(1, 4):
+            pos = pg.locateOnScreen('C:/C/pyautogui/Name.png')
+            if pos:
+                cent = pg.center(pos)
+                pg.click(cent)
+                pg.typewrite(self.name)
+                break
+            else:
+                if i % 2 == 0:
+                    pg.scroll(i * (-1000))
+                else:
+                    pg.scroll(i * 1000)
+        self.Fear()
+
+    def Fear(self):
+        time.sleep(0.2)
+        for i in range(1, 4):
+            pos = pg.locateOnScreen('C:/C/pyautogui/Fear.png')
+            if pos:
+                cent = pg.center(pos)
+                pg.click(cent)
+                pg.typewrite(self.info_[0])
+                break
+            else:
+                if i % 2 == 0:
+                    pg.scroll(i * (-1000))
+                else:
+                    pg.scroll(i * (1000))
+        self.select_m()
+
+    def select_m(self):
+        rnd = random.choice(['True', 'True', 'False'])
+        rnd_height = random.randint(40, 80)
+        if rnd == 'True':
+            for i in range(1, 4):
+                pos = pg.locateOnScreen('C:/C/pyautogui/power.png')
+                if pos:
+                    time.sleep(0.2)
+                    x, y = pg.center(pos)
+                    pg.click(x - 10, y + 20)
+                    time.sleep(0.2)
+                    pg.click(x - 40, y + rnd_height)
+                    break
+
+        self.radioB()
+
+    def radioB(self):
+        time.sleep(0.2)
+        rnd_pos = random.randrange(-30, 30, 5)
+        for i in range(1, 4):
+            pos = pg.locateOnScreen('C:/C/pyautogui/radioB.png')
+            if pos:
+                x, y = pg.center(pos)
+                for j in range(7):
+                    pg.click(x + rnd_pos + j, y)
+        self.additComment()
+
+    def additComment(self):
+        time.sleep(0.2)
+        for i in range(1, 4):
+            pos = pg.locateOnScreen('C:/C/pyautogui/additComment.png')
+            if pos:
+                cent = pg.center(pos)
+                pg.click(cent)
+                pg.typewrite(self.info_[1])
+            else:
+                if i % 2 == 0:
+                    pg.scroll(i * (-1000))
+                else:
+                    pg.scroll(i * (1000))
+        self.enviar()
+
+    def enviar(self):
+        time.sleep(0.2)
+        for i in range(1, 4):
+            pos = pg.locateOnScreen('C:/C/pyautogui/enviar.png')
+            if pos:
+                cent = pg.center(pos)
+                pg.click(cent)
+                pg.click()
+                self.done_()
+                break
+            else:
+                if i % 2 == 0:
+                    pg.scroll(-1000)
+                else:
+                    pg.scroll(1000)
+
+    def done_(self):
+        time.sleep(0.2)
+        for i in range(1, 4):
+            pos_exit = pg.locateOnScreen('C:/C/pyautogui/done.png')
+            if pos_exit:
+                self.toClose()
+                print('pos_exit')
+            else:
+                self.red_label()
+
+    def red_label(self):
+        rnd_height = random.randint(20, 60)
+        time.sleep(0.2)
+        for i in range(1, 4):
+            pos_red = pg.locateOnScreen('C:/C/pyautogui/obligatoria.png')
+            if pos_red:
+                time.sleep(0.2)
+                x, y = pg.center(pos_red)
+                pg.click(x, y - 20)
+                time.sleep(0.2)
+                pg.click(x, y + rnd_height)
+                self.enviar()
+
+    def toClose(self):
+        print('toClose')
+        time.sleep(0.2)
+        pg.hotkey('ctrl', 'w')
+
+
+def main():
+    formData = {'Alice': ['To dance', 'My name is Alice!'],
+                'Denys': ['To be c-t', 'Dunno what to tyoe here...'],
+                'Bob': ['To sweam', 'Im not very good at coding...'],
+                'Arni': ['To be a terminator', 'I wanna be a president']}
+
+    for i in range(3):
+        rnd = random.choice(['Alice', 'Denys', 'Bob', 'Arni'])
+        start = Filling_form(rnd, formData[rnd])
+
+
+main()
