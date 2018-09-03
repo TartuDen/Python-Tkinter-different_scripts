@@ -15,21 +15,22 @@ import math
 import time
 import os
 import pyautogui as pg
+import sys
+import codecs
+#
 # search mayusculas y menusculas -DONE
 # check the new table and compare with the old one -DONE
 # possibility to add new lines - in progress
 
 
 class Create_check_db(object):
-    def __init__(self, loc_V1, loc_V3, loc_Voc_comp):
-        self.loc_V1 = loc_V1
-        self.loc_V3 = loc_V3
-        self.loc_Voc_comp = loc_Voc_comp
+    def __init__(self):
         # self.Create()  # - update DB
         # self.Check_Combine_db()
+        pass
 
     def Create(self):
-        conn = sqlite3.connect(self.loc_V3)
+        conn = sqlite3.connect('V3.db')
         c = conn.cursor()
 
         c.execute("""CREATE TABLE voc_table(
@@ -39,7 +40,7 @@ class Create_check_db(object):
         esp_ text)""")
         idx = 0
 
-        wordDoc = Document(self.loc_Voc_comp)
+        wordDoc = Document('Vocabulario_Completo_Ruso_Eng_Esp_Eesti.docx')
         for table in wordDoc.tables:
             for row in table.rows:
                 list_ = []
@@ -47,10 +48,8 @@ class Create_check_db(object):
                 for cell in row.cells:
                     temp_ = ''
                     for ch in cell.text:
-
-                        if ord(ch) in range(65000):
+                        if ord(ch) in range(65535):
                             temp_ = temp_ + ch
-
                     try:
                         list_.append(temp_)
                     except:
@@ -64,9 +63,9 @@ class Create_check_db(object):
                 conn.commit()
 
     def Check_Combine_db(self):
-        conn = sqlite3.connect(self.loc_V1)
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
-        conn2 = sqlite3.connect(self.loc_V3)
+        conn2 = sqlite3.connect('V3.db')
         c2 = conn2.cursor()
         c.execute("SELECT* FROM voc_table")
         c2.execute("SELECT* FROM voc_table")
@@ -81,13 +80,13 @@ class Create_check_db(object):
         for ln2 in list_to2:
             match = False
             for ln1 in list_to1:
-                if ln1[1] == ln2[1]:
+                if ln1[1] == ln2[1] and ln1[2] == ln2[2]:
                     match = True
                     break
             if match == False:
                 total.append(ln2)
 
-        print('Lines were changed: ', total)
+        #print('Lines were changed: ', total)
         for st in total:
             if len(st) == 4:
                 c.execute("INSERT INTO voc_table VALUES(?,?,?,?)", (st[0], st[1], st[2], st[3]))
@@ -119,9 +118,9 @@ class Translate_selected(object):
             pass
         transl_from_eng_esp = self.translator.translate(selected, dest='es')
 
-        is_None=self.graph_.text_esp.get('1.0','end')
+        is_None = self.graph_.text_esp.get('1.0', 'end')
         if 'None' in is_None:
-            self.graph_.text_esp.delete('1.0','end')
+            self.graph_.text_esp.delete('1.0', 'end')
             self.graph_.text_esp.insert('end', '%s' % transl_from_eng_esp.text)
         else:
             self.graph_.text_esp.insert('end', '\n%s' % transl_from_eng_esp.text)
@@ -130,33 +129,33 @@ class Translate_selected(object):
             self.graph_.text_eng.insert('end', '\n\n')
             self.graph_.text_eng.insert('end', '--------------')
             self.graph_.text_eng.insert('end', '\n')
-            self.graph_.text_eng.insert('end', 'Noun:  ʻ%sʼ'%selected.upper())
+            self.graph_.text_eng.insert('end', 'Noun:  ʻ%sʼ' % selected.upper())
             self.graph_.text_eng.insert('end', '\n')
             for sent_ in meaning['Noun']:
-                self.graph_.text_eng.insert('end', '* '+sent_)
+                self.graph_.text_eng.insert('end', '* ' + sent_)
                 self.graph_.text_eng.insert('end', '\n')
 
             self.graph_.text_eng.insert('end', '\n\n')
             self.graph_.text_eng.insert('end', '--------------')
             self.graph_.text_eng.insert('end', '\n')
-            self.graph_.text_eng.insert('end', 'Verb:  ʻ%sʼ'%selected.upper())
+            self.graph_.text_eng.insert('end', 'Verb:  ʻ%sʼ' % selected.upper())
             self.graph_.text_eng.insert('end', '\n')
             for sent_ in meaning['Verb']:
-                self.graph_.text_eng.insert('end', '* '+sent_)
+                self.graph_.text_eng.insert('end', '* ' + sent_)
                 self.graph_.text_eng.insert('end', '\n')
             self.graph_.text_eng.insert('end', '\n\n')
             self.graph_.text_eng.insert('end', '--------------')
             self.graph_.text_eng.insert('end', '\n')
-            self.graph_.text_eng.insert('end', 'Adjective:  ʻ%sʼ'%selected.upper())
+            self.graph_.text_eng.insert('end', 'Adjective:  ʻ%sʼ' % selected.upper())
             self.graph_.text_eng.insert('end', '\n')
             for sent_ in meaning['Adjective']:
-                self.graph_.text_eng.insert('end', '* '+sent_)
+                self.graph_.text_eng.insert('end', '* ' + sent_)
                 self.graph_.text_eng.insert('end', '\n')
         except:
             pass
-        if self.graph_.get_BrowserGoogle_var.get()=='True':
+        if self.graph_.get_BrowserGoogle_var.get() == 'True':
             self.getBrowserGoogle(selected)
-        if self.graph_.get_BrowserWR_var.get()=='True':
+        if self.graph_.get_BrowserWR_var.get() == 'True':
             self.getBrowserWR(selected)
 
     def getBrowserGoogle(self, selected):
@@ -174,17 +173,17 @@ class Translate_selected(object):
         pg.hotkey('enter')
 
 
-
 class Graph(object):
     def __init__(self, master):
 
         self.color = 0
         self.sel = StringVar()
         self.fav_sel = StringVar()
+        self.eesti_sel = StringVar()
         self.goBack = StringVar()
         self.Color_select = StringVar()
-        self.get_BrowserGoogle_var=StringVar()
-        self.get_BrowserWR_var=StringVar()
+        self.get_BrowserGoogle_var = StringVar()
+        self.get_BrowserWR_var = StringVar()
 
         self.master = master
         self.master.config(bg='LightCyan3')
@@ -201,6 +200,7 @@ class Graph(object):
         self.f_word = Favorits(self)
         self.edit_ = Edit_(self)
         self.sel_txt = Translate_selected(self)
+        self.eesti_ = Eesti(self)
 
         self.master.protocol("WM_DELETE_WINDOW", self.f_word.on_closing)
         self.master.bind('<Escape>', lambda e: self.f_word.on_closing())
@@ -210,7 +210,7 @@ class Graph(object):
 
         self.text_rus.bind('<Double-Button-1>', lambda e: self.word_.getWord())
 
-        self.color_combo = ttk.Combobox(self.master, textvariable=self.Color_select,values=('Blue','Green','Red','White'))
+        self.color_combo = ttk.Combobox(self.master, textvariable=self.Color_select, values=('Blue', 'Green', 'Red', 'White'))
         self.color_combo.place(relx=0.01, rely=0.01)
         self.Color_select.set('Blue')
 
@@ -221,14 +221,13 @@ class Graph(object):
         self.master.bind('<F2>', lambda e: self.sel_txt.method_eng_esp_and_meaning_esp())
         self.master.bind('<F3>', lambda e: self.edit_.edit_word_file())
 
+        self.label_info1 = ttk.Label(self.master)
+        self.label_info1.place(relx=0.25, y=2, width=200, height=67)
+        self.label_info1.config(text=' F1 - rus->esp;\n F2 - eng->esp + eng meaning;\n F2 + get Browser;\n F3 - word doc search;', relief=RIDGE, background='#C5D8D8')
 
-        self.label_info1=ttk.Label(self.master)
-        self.label_info1.place(relx=0.25, y=2, width=200,height=67)
-        self.label_info1.config(text=' F1 - rus->esp;\n F2 - eng->esp + eng meaning;\n F2 + get Browser;\n F3 - word doc search;',relief=RIDGE,background='#C5D8D8')
-
-        self.label_info2=ttk.Label(self.master)
-        self.label_info2.place(relx=0.54, y=2, width=100,height=50)
-        self.label_info2.config(text='',relief=RIDGE,background='#C5D8D8')
+        self.label_info2 = ttk.Label(self.master)
+        self.label_info2.place(relx=0.54, y=2, width=100, height=50)
+        self.label_info2.config(text='', relief=RIDGE, background='#C5D8D8')
 
         self.b_search = Button(self.master, text=' (¬_¬) <SEARCH>  ಠ_ಠ ', command=self.search_)
         self.b_search.place(relx=0.77, y=400, width=150)
@@ -248,13 +247,17 @@ class Graph(object):
         self.Fav_button.place(x=450, y=60)
         self.Fav_button.config(variable=self.fav_sel, onvalue='True', offvalue='False')
 
+        self.Eesti_button = ttk.Checkbutton(self.master, text='Eesti')
+        self.Eesti_button.place(x=450, y=83)
+        self.Eesti_button.config(variable=self.eesti_sel, onvalue='True', offvalue='False')
+
         self.browsG_button = ttk.Checkbutton(self.master, text='Google')
         self.browsG_button.place(x=20, y=75)
         self.browsG_button.config(variable=self.get_BrowserGoogle_var, onvalue='True', offvalue='False')
 
         self.browsWR_button = ttk.Checkbutton(self.master, text='WordRef')
         self.browsWR_button.place(x=20, y=98)
-        self.browsWR_button.config(variable=self.get_BrowserWR_var , onvalue='True', offvalue='False')
+        self.browsWR_button.config(variable=self.get_BrowserWR_var, onvalue='True', offvalue='False')
 
         self.b_fav_add = Button(self.master, text=' Añadir ', command=self.f_word.add_)
         self.b_fav_add.place(relx=0.75, y=60, width=80)
@@ -303,49 +306,45 @@ class Graph(object):
 
     def color_apply(self):
         #'Blue' - '#46a3ff','Green' - '#00c100','Red' - '#ff4242','White' - '#ffffff'
-        #self.color = colorchooser.askcolor(initialcolor='#FFFFFF')  # this opens the color table
-        if self.Color_select.get()=='Blue':
+        # self.color = colorchooser.askcolor(initialcolor='#FFFFFF')  # this opens the color table
+        if self.Color_select.get() == 'Blue':
 
             try:
-                sel_first_index=(self.text_rus.index(SEL_FIRST))
-                self.text_rus.insert(sel_first_index,'ʻ')
-                sel_last_index=(self.text_rus.index(SEL_LAST))
-                self.text_rus.insert(sel_last_index,'ʼ')
-                self.text_rus.tag_add('blue',sel_first_index,sel_last_index)
+                sel_first_index = (self.text_rus.index(SEL_FIRST))
+                self.text_rus.insert(sel_first_index, 'ʻ')
+                sel_last_index = (self.text_rus.index(SEL_LAST))
+                self.text_rus.insert(sel_last_index, 'ʼ')
+                self.text_rus.tag_add('blue', sel_first_index, sel_last_index)
             except:
                 None
             try:
-                sel_first_index=(self.text_eng.index(SEL_FIRST))
-                self.text_eng.insert(sel_first_index,'ʻ')
-                sel_last_index=(self.text_eng.index(SEL_LAST))
-                self.text_eng.insert(sel_last_index,'ʼ')
-                self.text_eng.tag_add('blue',sel_first_index,sel_last_index)
+                sel_first_index = (self.text_eng.index(SEL_FIRST))
+                self.text_eng.insert(sel_first_index, 'ʻ')
+                sel_last_index = (self.text_eng.index(SEL_LAST))
+                self.text_eng.insert(sel_last_index, 'ʼ')
+                self.text_eng.tag_add('blue', sel_first_index, sel_last_index)
             except:
                 None
             try:
-                sel_first_index=(self.text_esp.index(SEL_FIRST))
-                self.text_esp.insert(sel_first_index,'ʻ')
-                sel_last_index=(self.text_esp.index(SEL_LAST))
-                self.text_esp.insert(sel_last_index,'ʼ')
-                self.text_esp.tag_add('blue',sel_first_index,sel_last_index)
+                sel_first_index = (self.text_esp.index(SEL_FIRST))
+                self.text_esp.insert(sel_first_index, 'ʻ')
+                sel_last_index = (self.text_esp.index(SEL_LAST))
+                self.text_esp.insert(sel_last_index, 'ʼ')
+                self.text_esp.tag_add('blue', sel_first_index, sel_last_index)
             except:
                 None
 
-        elif self.Color_select.get()=='Green':
-            sel_first_index=(self.text_rus.index(SEL_FIRST))
-            self.text_rus.insert(sel_first_index,'´')
-            sel_last_index=(self.text_rus.index(SEL_LAST))
-            self.text_rus.insert(sel_last_index,'´')
-            self.text_rus.tag_add('green',sel_first_index,sel_last_index)
+        elif self.Color_select.get() == 'Green':
+            sel_first_index = (self.text_rus.index(SEL_FIRST))
+            self.text_rus.insert(sel_first_index, '´')
+            sel_last_index = (self.text_rus.index(SEL_LAST))
+            self.text_rus.insert(sel_last_index, '´')
+            self.text_rus.tag_add('green', sel_first_index, sel_last_index)
 
-
-        self.text_rus.tag_config('blue',background='lightblue',foreground='black')
-        self.text_eng.tag_config('blue',background='lightblue',foreground='black')
-        self.text_esp.tag_config('blue',background='lightblue',foreground='black')
-        #self.text_rus.tag_config('green',background='lightgreen',foreground='black')
-
-
-
+        self.text_rus.tag_config('blue', background='lightblue', foreground='black')
+        self.text_eng.tag_config('blue', background='lightblue', foreground='black')
+        self.text_esp.tag_config('blue', background='lightblue', foreground='black')
+        # self.text_rus.tag_config('green',background='lightgreen',foreground='black')
 
 
 class Edit_(object):
@@ -357,6 +356,7 @@ class Edit_(object):
         self.edit_eng()
         self.edit_esp()
 #______________________________
+
     def edit_rus(self):
         to_modif_rus = (self.graph_.text_rus.get('1.0', 'end'))
         if self.graph_.word_.rnd_for_continue == self.graph_.word_.total_count[self.graph_.word_.ind_backwards]:
@@ -365,7 +365,7 @@ class Edit_(object):
         else:
             idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
             print('rus else: ', idx)
-        conn = sqlite3.connect('C:/C/V1.db')
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET rus_=? WHERE rowid=?", (to_modif_rus, idx))
         conn.commit()
@@ -378,7 +378,7 @@ class Edit_(object):
         else:
             idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
             print('eng else: ', idx)
-        conn = sqlite3.connect('C:/C/V1.db')
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET eng_=? WHERE rowid=?", (to_modif_eng, idx))
         conn.commit()
@@ -391,36 +391,36 @@ class Edit_(object):
         else:
             idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
             print('esp else: ', idx)
-#____________________________
-        conn = sqlite3.connect('C:/C/V1.db')
+
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET esp_=? WHERE rowid=?", (to_modif_esp, idx))
         conn.commit()
+        #____________________________
 
     def edit_word_file(self):
         os.startfile('C:/C/Vocabulario_Completo_copy.docx')
         time.sleep(2)
-        pg.moveTo(500,400)
+        pg.moveTo(500, 400)
         pg.click(500, 400)
         pg.hotkey('ctrl', 'f')
         try:
-            selected=self.graph_.text_eng.get(SEL_FIRST,SEL_LAST)
+            selected = self.graph_.text_eng.get(SEL_FIRST, SEL_LAST)
         except:
             None
         try:
-            selected=self.graph_.text_esp.get(SEL_FIRST,SEL_LAST)
+            selected = self.graph_.text_esp.get(SEL_FIRST, SEL_LAST)
         except:
             None
         pg.typewrite(selected)
         pg.hotkey('enter')
 
 
-
 class Favorits(object):
     def __init__(self, graph_):
         self.fav_list = []
         self.graph_ = graph_
-        self.conn3 = sqlite3.connect('C:/C/V2.db')
+        self.conn3 = sqlite3.connect('V2.db')
         self.c3 = self.conn3.cursor()
         self.c3.execute("SELECT * FROM fav")
         for w in self.c3.fetchall():
@@ -449,6 +449,55 @@ class Favorits(object):
             self.graph_.master.destroy()
 
 
+class Eesti(object):
+    def __init__(self, word_):
+        self.word_ = word_
+
+        self.conn_eesti = sqlite3.connect(':memory:')
+        self.c_eesti = self.conn_eesti.cursor()
+        self.c_eesti.execute("CREATE TABLE eesti_words(index_,est_,eng_,ex_)")
+        wordDoc = Document('Vocabulario_Eesti.docx')
+        idx = 0
+        for table in wordDoc.tables:
+            for row in table.rows:
+                list_ = []
+
+                for cell in row.cells:
+                    temp_ = ''
+                    for ch in cell.text:
+                        if ord(ch) in range(65535):
+                            temp_ = temp_ + ch
+                    try:
+                        list_.append(temp_)
+                    except:
+                        None
+                if len(list_) == 3:
+                    self.c_eesti.execute("INSERT INTO eesti_words VALUES (?,?,?,?)", (idx, list_[0], list_[1], list_[2]))
+                    idx += 1
+                elif len(list_) == 2:
+                    self.c_eesti.execute("INSERT INTO eesti_words VALUES (?,?,?,?)", (idx, list_[0], list_[1], 'None'))
+                    idx += 1
+                self.conn_eesti.commit()
+
+    def getEestiWord(self):
+        self.c_eesti.execute("SELECT Count(*) FROM eesti_words")
+        eesti_lim = self.c_eesti.fetchall()
+        print('eesti limit: ', eesti_lim)
+        rnd = random.randint(1, eesti_lim[0][0])
+        self.word_.graph_.text_rus.delete('1.0', 'end')
+        self.word_.graph_.text_esp.delete('1.0', 'end')
+        self.word_.graph_.text_eng.delete('1.0', 'end')
+        self.c_eesti.execute("SELECT * FROM eesti_words WHERE rowid=%d" % rnd)
+        f = (self.c_eesti.fetchone())
+        self.word_.graph_.text_rus.insert('1.0', f[1])
+        self.word_.graph_.text_eng.insert('1.0', f[2])
+        self.word_.graph_.text_esp.insert('1.0', f[3])
+        self.word_.bg_colour()
+
+    def test(self):
+        print('here')
+
+
 class W0rd(object):
     def __init__(self, graph_):
         self.rnd_for_continue = 0
@@ -457,13 +506,17 @@ class W0rd(object):
         self.f_0_to_remove = []
         self.graph_ = graph_
         self.total_count = []
+        self.eesti_ = Eesti(self)
         #______________________________________________
-        self.conn = sqlite3.connect(r'C:/C/V1.db')
+        self.conn = sqlite3.connect(r'V1.db')
         self.conn_frases = sqlite3.connect(':memory:')
-        self.conn_favorits = sqlite3.connect('C:/C/V2.db')
+
+        self.conn_favorits = sqlite3.connect('V2.db')
         self.c = self.conn.cursor()
         self.c_frases = self.conn_frases.cursor()
+
         self.c_frases.execute("CREATE TABLE frases_words(id_,rus_f,eng_f)")
+
         self.c_favorits = self.conn_favorits.cursor()
         self.search_list_rus = []
         self.search_list_eng = []
@@ -473,7 +526,6 @@ class W0rd(object):
             if 'Frases' in w[1]:
                 self.c_frases.execute("INSERT INTO frases_words VALUES(?,?,?)", (w[0], w[1], w[2]))
                 self.conn_frases.commit()
-
             if len(w) == 4:
                 self.search_list_rus.append(w[1])
                 self.search_list_eng.append(w[2])
@@ -482,30 +534,31 @@ class W0rd(object):
                 self.search_list_rus.append(w[1])
                 self.search_list_eng.append(w[2])
                 self.search_list_esp.append('None')
+
     def bg_colour(self):
-        if self.graph_.text_rus.search('ʻ','1.0','end'):
-            open_=self.graph_.text_rus.search('ʻ','1.0','end')
-            close_=self.graph_.text_rus.search('ʼ','1.0','end')
+        if self.graph_.text_rus.search('ʻ', '1.0', 'end'):
+            open_ = self.graph_.text_rus.search('ʻ', '1.0', 'end')
+            close_ = self.graph_.text_rus.search('ʼ', '1.0', 'end')
             if open_ and close_:
 
-                self.graph_.text_rus.tag_add('blue',open_,close_)
-                self.graph_.text_rus.tag_config('blue',background='lightblue')
+                self.graph_.text_rus.tag_add('blue', open_, close_)
+                self.graph_.text_rus.tag_config('blue', background='lightblue')
 
-        elif self.graph_.text_eng.search('ʻ','1.0','end'):
-            open_=self.graph_.text_eng.search('ʻ','1.0','end')
-            close_=self.graph_.text_eng.search('ʼ','1.0','end')
+        elif self.graph_.text_eng.search('ʻ', '1.0', 'end'):
+            open_ = self.graph_.text_eng.search('ʻ', '1.0', 'end')
+            close_ = self.graph_.text_eng.search('ʼ', '1.0', 'end')
             if open_ and close_:
 
-                self.graph_.text_eng.tag_add('blue',open_,close_)
-                self.graph_.text_eng.tag_config('blue',background='lightblue')
+                self.graph_.text_eng.tag_add('blue', open_, close_)
+                self.graph_.text_eng.tag_config('blue', background='lightblue')
 
-        elif self.graph_.text_esp.search('ʻ','1.0','end'):
-            open_=self.graph_.text_esp.search('ʻ','1.0','end')
-            close_=self.graph_.text_esp.search('ʼ','1.0','end')
+        elif self.graph_.text_esp.search('ʻ', '1.0', 'end'):
+            open_ = self.graph_.text_esp.search('ʻ', '1.0', 'end')
+            close_ = self.graph_.text_esp.search('ʼ', '1.0', 'end')
             if open_ and close_:
 
-                self.graph_.text_esp.tag_add('blue',open_,close_)
-                self.graph_.text_esp.tag_config('blue',background='lightblue')
+                self.graph_.text_esp.tag_add('blue', open_, close_)
+                self.graph_.text_esp.tag_config('blue', background='lightblue')
 
     def getWord(self):
 
@@ -517,11 +570,14 @@ class W0rd(object):
             self.graph_.text_rus.delete('1.0', 'end')
             self.graph_.text_esp.delete('1.0', 'end')
             self.graph_.text_eng.delete('1.0', 'end')
-            self.c_frases.execute("select *from frases_words where rowid=%d" % rnd)
+            self.c_frases.execute("SELECT * FROM frases_words WHERE rowid=%d" % rnd)
             f = (self.c_frases.fetchone())
             self.graph_.text_rus.insert('1.0', f[1])
 
             self.bg_colour()
+
+        elif (self.graph_. eesti_sel .get()) == 'True':
+            self.eesti_.getEestiWord()
 
         elif (self.graph_.fav_sel.get()) == 'True':
 
@@ -566,12 +622,11 @@ class W0rd(object):
             lim_ = self.c.fetchall()
             self.rnd_for_continue = random.randint(1, lim_[0][0])
             print(lim_[0][0], ' - ', self.rnd_for_continue)
-            self.graph_.label_info2.config(text='  %d - %d'%(lim_[0][0], self.rnd_for_continue))
+            self.graph_.label_info2.config(text='  %d - %d' % (lim_[0][0], self.rnd_for_continue))
             self.total_count.append(self.rnd_for_continue)
             print('straight: ', self.total_count)
             self.c.execute("select * from voc_table where rowid=%d" % self.rnd_for_continue)
             temp_list = (self.c.fetchone())
-
 
             try:
                 self.graph_.text_rus.delete('1.0', 'end')
@@ -586,12 +641,11 @@ class W0rd(object):
             self.bg_colour()
 
 
-
 def main():
-    location_V1 = r'C:/C/V1.db'
-    location_V3 = r'C:/C/V3.db'
-    location_Voc_Compl = r'C:\Users\Denis\Desktop\IT\PYTHON\Vocabulario_Completo.docx'
-    create_V3_combine_V3_with_V1 = Create_check_db(location_V1, location_V3, location_Voc_Compl)
+    location_V1 = 'V1.db'
+    location_V3 = 'V3.db'
+    location_Voc_Compl = 'Vocabulario_Completo_Ruso_Eng_Esp_Eesti.docx'
+    create_V3_combine_V3_with_V1 = Create_check_db()
 
     root = Tk()
 
@@ -603,4 +657,5 @@ def main():
 
 
 main()
+
 
