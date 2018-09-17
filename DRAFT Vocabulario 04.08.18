@@ -63,7 +63,7 @@ class Create_check_db(object):
                 conn.commit()
 
     def Check_Combine_db(self):
-        conn = sqlite3.connect('V2.db')
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         conn2 = sqlite3.connect('V3.db')
         c2 = conn2.cursor()
@@ -361,6 +361,8 @@ class Graph(object):
         test_rus.sort(key = lambda s: len(s),reverse=True)
 
 
+
+
         if 'Eesti:' in test_rus[0]:
             for w in test_rus:
                 self.text_rus.insert(INSERT, '%d)  ' % count + w)
@@ -423,7 +425,7 @@ class Graph(object):
 class Fonts(object):
     def __init__(self,graph_):
         self.graph_=graph_
-        self.conn=sqlite3.connect('V2.db')
+        self.conn=sqlite3.connect('V1.db')
         self.c=self.conn.cursor()
         self.selected=''
 
@@ -455,10 +457,7 @@ class Fonts(object):
             self.graph_.text_esp.tag_add('bold',SEL_FIRST,SEL_LAST)
         except:
             pass
-        print(selected)
-        print(idx)
-        print(text_w)
-        print('len tag: ',len(tag_))
+
         if len(tag_)>0:
             new_tag_=tag_[0]+','+'%s:'%(text_w)+'bold:%s'%(selected)+','
         else:
@@ -469,11 +468,14 @@ class Fonts(object):
 
         self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
         tag_=self.c.fetchone()
-        print('now tag is: ',tag_)
 
         self.graph_.text_rus.tag_config('bold',font=('Arial',10,'bold'))
         self.graph_.text_eng.tag_config('bold',font=('Arial',10,'bold'))
         self.graph_.text_esp.tag_config('bold',font=('Arial',10,'bold'))
+
+        self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
+        tag_=self.c.fetchone()
+        print('tag after: ',tag_)
 
 
 
@@ -504,10 +506,7 @@ class Fonts(object):
             self.graph_.text_esp.tag_add('italic',SEL_FIRST,SEL_LAST)
         except:
             pass
-        print(selected)
-        print(idx)
-        print(text_w)
-        print('len tag: ',len(tag_))
+
         if len(tag_)>0:
             new_tag_=tag_[0]+','+'%s:'%(text_w)+'italic:%s'%(selected)+','
         else:
@@ -518,7 +517,8 @@ class Fonts(object):
 
         self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
         tag_=self.c.fetchone()
-        print('now tag is: ',tag_)
+        print('tag after: ',tag_)
+
 
 
         self.graph_.text_rus.tag_config('italic',font=('Arial',10,'italic','bold'))
@@ -551,10 +551,6 @@ class Fonts(object):
             self.graph_.text_esp.tag_add('blue_bg',SEL_FIRST,SEL_LAST)
         except:
             pass
-        print(selected)
-        print(idx)
-        print(text_w)
-        print('len tag: ',len(tag_))
         if len(tag_)>0:
             new_tag_=tag_[0]+','+'%s:'%(text_w)+'blue_bg:%s'%(selected)+','
         else:
@@ -565,35 +561,39 @@ class Fonts(object):
 
         self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
         tag_=self.c.fetchone()
-        print('now tag is: ',tag_)
+
 
         self.graph_.text_rus.tag_config('blue_bg',font='bold',background='#46a3ff')
         self.graph_.text_eng.tag_config('blue_bg',font='bold',background='#46a3ff')
         self.graph_.text_esp.tag_config('blue_bg',font='bold',background='#46a3ff')
 
+        self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
+        tag_=self.c.fetchone()
+        print('tag after: ',tag_)
+
     def clear_tag(self):
         try:
             selected=self.graph_.text_rus.get(SEL_FIRST,SEL_LAST)
             self.graph_.text_rus.tag_add('blank',SEL_FIRST,SEL_LAST)
-            self.graph_.text_rus.tag_config('blank',background='white',font=())
+            self.graph_.text_rus.tag_config('blank',background='old lace',font=())
         except:
             pass
         try:
             selected=self.graph_.text_eng.get(SEL_FIRST,SEL_LAST)
             self.graph_.text_eng.tag_add('blank',SEL_FIRST,SEL_LAST)
-            self.graph_.text_eng.tag_config('blank',background='white',font=())
+            self.graph_.text_eng.tag_config('blank',background='old lace',font=())
         except:
             pass
         try:
             selected=self.graph_.text_esp.get(SEL_FIRST,SEL_LAST)
             self.graph_.text_esp.tag_add('blank',SEL_FIRST,SEL_LAST)
-            self.graph_.text_esp.tag_config('blank',background='white',font=())
+            self.graph_.text_esp.tag_config('blank',background='old lace',font=())
         except:
             pass
         idx=self.graph_.word_.rnd_for_continue
         self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
         tag_=self.c.fetchone()
-        print('tag before: ',tag_)
+        print('tag before: ', tag_)
         tag_=str(tag_)
         tag_=tag_.split(',')
         new_tag=''
@@ -607,19 +607,18 @@ class Fonts(object):
                     print('w2:  ', (w.split(':'))[2])
                     new_tag=new_tag+','+w
 
-        print('tag : ',new_tag)
 
         self.c.execute("UPDATE voc_table SET tag=? WHERE rowid=?",(new_tag,idx))
         self.conn.commit()
 
         self.c.execute("SELECT tag FROM voc_table WHERE rowid=?",(idx,))
         tag_=self.c.fetchone()
-        print('tag after: ',tag_)
+        print('tag after: ', tag_)
 
 class Delete_row(object):
     def __init__(self,graph_):
         self.graph_=graph_
-        self.conn=sqlite3.connect('V2.db')
+        self.conn=sqlite3.connect('V1.db')
         self.c=self.conn.cursor()
         self.toDelete_rus=[]
         self.toDelete_eng=[]
@@ -659,7 +658,6 @@ class Edit_(object):
         self.edit_rus()
         self.edit_eng()
         self.edit_esp()
-#______________________________
 
     def edit_rus(self):
         to_modif_rus = (self.graph_.text_rus.get('1.0', 'end'))
@@ -669,7 +667,7 @@ class Edit_(object):
         else:
             idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
             print('rus else: ', idx)
-        conn = sqlite3.connect('V2.db')
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET rus_=? WHERE rowid=?", (to_modif_rus, idx))
         conn.commit()
@@ -682,7 +680,7 @@ class Edit_(object):
         else:
             idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
             print('eng else: ', idx)
-        conn = sqlite3.connect('V2.db')
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET eng_=? WHERE rowid=?", (to_modif_eng, idx))
         conn.commit()
@@ -696,11 +694,10 @@ class Edit_(object):
             idx = self.graph_.word_.total_count[self.graph_.word_.ind_backwards + 1]
             print('esp else: ', idx)
 
-        conn = sqlite3.connect('V2.db')
+        conn = sqlite3.connect('V1.db')
         c = conn.cursor()
         c.execute("UPDATE voc_table SET esp_=? WHERE rowid=?", (to_modif_esp, idx))
         conn.commit()
-        #____________________________
 
     def edit_word_file(self):
         os.startfile('C:/C/Vocabulario_Completo_copy.docx')
@@ -723,7 +720,7 @@ class Edit_(object):
 class Nuevo(object):
     def __init__(self, graph_):
         self.graph_ = graph_
-        self.conn=sqlite3.connect('V2.db')
+        self.conn=sqlite3.connect('V1.db')
         self.c=self.conn.cursor()
 
 
@@ -750,6 +747,7 @@ class Favorits(object):
         self.fav_list = []
         self.graph_ = graph_
         self.conn3 = sqlite3.connect('V2.db')
+        #_____________________________________________
         self.c3 = self.conn3.cursor()
         self.c3.execute("SELECT * FROM fav")
         for w in self.c3.fetchall():
@@ -833,11 +831,11 @@ class W0rd(object):
         self.graph_ = graph_
         self.total_count = []
         self.eesti_ = Eesti(self)
-        #______________________________________________
-        self.conn = sqlite3.connect(r'V2.db')
+        self.conn = sqlite3.connect(r'V1.db')
         self.conn_frases = sqlite3.connect(':memory:')
 
         self.conn_favorits = sqlite3.connect('V2.db')
+        #_____________________________________________________
         self.c = self.conn.cursor()
         self.c_frases = self.conn_frases.cursor()
 
@@ -852,14 +850,15 @@ class W0rd(object):
             if 'Frases' in w[1]:
                 self.c_frases.execute("INSERT INTO frases_words VALUES(?,?,?)", (w[0], w[1], w[2]))
                 self.conn_frases.commit()
-            if len(w) == 4:
+            if len(w) == 5:
                 self.search_list_rus.append(w[1])
                 self.search_list_eng.append(w[2])
                 self.search_list_esp.append(w[3])
-            elif len(w) == 3:
+            elif len(w) == 4:
                 self.search_list_rus.append(w[1])
                 self.search_list_eng.append(w[2])
                 self.search_list_esp.append('None')
+
 
     # def bg_colour(self):
     #     if self.graph_.text_rus.search('ʻ', '1.0', 'end'):
@@ -972,7 +971,7 @@ class W0rd(object):
             for w in getTag:
                 if 'bold' in w:
                     w=w.split(':')
-                    print('w: ', w[0],w[1],w[2])
+                    #print('w: ', w[0],w[1],w[2])
                     if w[0]=='rus':
                         start_pos=self.graph_.text_rus.search(w[2],'1.0',stopindex=END,count=countVar)
                         end_pos='%s+%sc'%(start_pos,countVar.get())
@@ -985,8 +984,7 @@ class W0rd(object):
                         start_pos=self.graph_.text_esp.search(w[2],'1.0',stopindex=END,count=countVar)
                         end_pos='%s+%sc'%(start_pos,countVar.get())
                         self.graph_.text_esp.tag_add('bold',start_pos,end_pos)
-                    print('start: ',start_pos)
-                    print('stop: ',end_pos)
+
 
                 elif 'italic' in w:
                     w=w.split(':')
@@ -1003,8 +1001,7 @@ class W0rd(object):
                         start_pos=self.graph_.text_esp.search(w[2],'1.0',stopindex=END,count=countVar)
                         end_pos='%s+%sc'%(start_pos,countVar.get())
                         self.graph_.text_esp.tag_add('italic',start_pos,end_pos)
-                    print('start: ',start_pos)
-                    print('stop: ',end_pos)
+
 
                 elif 'blue_bg' in w:
                     w=w.split(':')
@@ -1021,8 +1018,7 @@ class W0rd(object):
                         start_pos=self.graph_.text_esp.search(w[2],'1.0',stopindex=END,count=countVar)
                         end_pos='%s+%sc'%(start_pos,countVar.get())
                         self.graph_.text_esp.tag_add('blue_bg',start_pos,end_pos)
-                    print('start: ',start_pos)
-                    print('stop: ',end_pos)
+
 
         self.graph_.text_rus.tag_config('bold',font=('Arial',10,'bold'))
         self.graph_.text_eng.tag_config('bold',font=('Arial',10,'bold'))
@@ -1040,7 +1036,7 @@ class W0rd(object):
 
 
 def main():
-    location_V1 = 'V2.db'
+    location_V1 = 'V1.db'
     location_V3 = 'V3.db'
     location_Voc_Compl = 'Vocabulario_Completo_Ruso_Eng_Esp_Eesti.docx'
     create_V3_combine_V3_with_V1 = Create_check_db()
