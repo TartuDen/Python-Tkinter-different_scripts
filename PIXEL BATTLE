@@ -1,0 +1,119 @@
+from tkinter import*
+from tkinter import ttk
+import random
+import time
+
+
+class Graph(object):
+    def __init__(self, master):
+        self.pix_ = Pix(self)
+        self.master = master
+        self.canvas_screen = Canvas(self.master)
+        self.canvas_screen.place(x=3, y=3, width=self.pix_.width, height=self.pix_.height)
+        self.start_b = Button(self.master, text='start', command=self.pix_.test)
+        self.start_b.place(relx=0.01, rely=0.95)
+
+
+class Pix(object):
+    def __init__(self, graph_):
+        self.width = 300
+        self.height = 300
+        self.div = 50
+        self.graph_ = graph_
+        self.pixs_blue = []
+        self.pixs_green = []
+        self.pixs_total = []
+        self.x_div = self.width / self.div
+        self.y_div = self.height / self.div
+        self.x_init = 0
+        self.y_init = 0
+
+    def test(self):
+        idx = 0
+        middle = self.width / 2
+        row = 0
+        total_count = 0
+        for j in range(self.div):
+            idx_blue = 0
+            idx_green = 0
+            self.pixs_blue.append([])
+            self.pixs_green.append([])
+            for i in range(self.div):
+                if self.x_init <= middle:
+                    self.pixs_blue[row].append(self.graph_.canvas_screen.create_rectangle(self.x_init, self.y_init, self.x_init + self.x_div, self.y_init + self.y_div))
+
+                    self.graph_.canvas_screen.itemconfigure(self.pixs_blue[row][idx_blue], fill='blue')
+                    idx_blue += 1
+
+                    self.x_init = self.x_init + self.x_div
+                elif self.x_init > middle:
+                    self.pixs_green[row].append(self.graph_.canvas_screen.create_rectangle(self.x_init, self.y_init, self.x_init + self.x_div, self.y_init + self.y_div))
+
+                    self.graph_.canvas_screen.itemconfigure(self.pixs_green[row][idx_green], fill='green')
+                    idx_green += 1
+
+                    self.x_init = self.x_init + self.x_div
+
+                if self.x_init > self.width:
+                    break
+            row += 1
+            self.x_init = 0
+            self.y_init = self.y_init + self.y_div
+            if self.y_init > 540:
+                break
+        self.battle()
+
+    def color(self):
+        list_colors = ['blue', 'yellow']
+        while True:
+            for i in range(len(self.pixs_total)):
+                rnd_pos = random.randint(0, len(self.pixs_total) - 1)
+                self.graph_.canvas_screen.itemconfigure(self.pixs[rnd_pos], fill='%s' % self.rnd())
+
+                self.graph_.master.update()
+
+    def rnd(self):
+        list_ = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'f']
+        color_ = '#%c%c%c%c%c%c' % (random.choice(list_), random.choice(list_), random.choice(list_), random.choice(list_), random.choice(list_), random.choice(list_))
+        return(color_)
+
+    def battle(self):
+        list_colors = ['blue', 'yellow']
+        while True:
+            rnd_field = random.choice(['green', 'blue'])
+            if rnd_field == 'green':
+                rnd_row = random.randint(0, len(self.pixs_green) - 1)
+                rnd_pos = random.randint(0, len(self.pixs_green[rnd_row]) - 1)
+                ch = rnd_pos / len(self.pixs_green[rnd_row])
+                rnd_test = random.random()
+                if rnd_test < ch + 0.3:
+                    self.graph_.canvas_screen.itemconfigure(self.pixs_green[rnd_row][rnd_pos], fill='green')
+
+                else:
+                    self.graph_.canvas_screen.itemconfigure(self.pixs_green[rnd_row][rnd_pos], fill='blue')
+
+                self.graph_.master.update()
+                print('green, ch, rnd_test', ch, rnd_test)
+            elif rnd_field == 'blue':
+                rnd_row = random.randint(0, len(self.pixs_blue) - 1)
+                rnd_pos = random.randint(0, len(self.pixs_blue[rnd_row]) - 1)
+                ch = rnd_pos / len(self.pixs_blue[rnd_row])
+                rnd_test = random.random()
+                if rnd_test < (1 - ch) + 0.3:
+                    self.graph_.canvas_screen.itemconfigure(self.pixs_blue[rnd_row][rnd_pos], fill='blue')
+
+                else:
+                    self.graph_.canvas_screen.itemconfigure(self.pixs_blue[rnd_row][rnd_pos], fill='green')
+                self.graph_.master.update()
+                print('blue, ch, rnd_test', ch, rnd_test)
+
+
+def main():
+    root = Tk()
+    root.geometry('500x600+400+200')
+    start = Graph(root)
+
+    root.mainloop()
+
+
+main()
