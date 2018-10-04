@@ -25,6 +25,7 @@ import codecs
 
 class Create_check_db(object):
     def __init__(self):
+
         # self.Create()  # - update DB
         # self.Check_Combine_db()
         pass
@@ -122,18 +123,21 @@ class Translate_selected(object):
             self.graph_.text_eng.insert('end', '\n%s' % transl_from_rus_eng.text)
 
     def method_eng_esp_and_meaning_esp(self):
+        print('here')
         try:
             selected = self.graph_.text_eng.get(SEL_FIRST, SEL_LAST)
             transl_from_eng_ee = self.translator.translate(selected, dest='ee')
             self.graph_.text_rus.insert('end', '\n%s\n' % ('-' * 15))
             self.graph_.text_rus.insert('end', '%s\n' % ('Eesti:'))
             self.graph_.text_rus.insert('end', '%s  -  %s' % (selected, transl_from_eng_ee.text))
+
         except:
             pass
         try:
             selected = self.graph_.text_esp.get(SEL_FIRST, SEL_LAST)
         except:
             pass
+
         transl_from_eng_esp = self.translator.translate(selected, dest='es')
 
         is_None = self.graph_.text_esp.get('1.0', 'end')
@@ -194,6 +198,7 @@ class Translate_selected(object):
 
 class Graph(object):
     def __init__(self, master):
+        start_graph=time.process_time()
 
         self.color = 0
         self.sel = StringVar()
@@ -324,6 +329,8 @@ class Graph(object):
 
         self.clear_tag_button=Button(self.font_frame,text='tg',bg='white',command=self.fonts_.clear_tag)
         self.clear_tag_button.place(x=65,rely=0.03,width=20, height=19)
+        stop_graph=time.process_time()
+        print('Graph time: %f'%(stop_graph- start_graph))
 
 
 
@@ -744,6 +751,7 @@ class Nuevo(object):
 
 class Favorits(object):
     def __init__(self, graph_):
+        start_fav=time.process_time()
         self.fav_list = []
         self.graph_ = graph_
         self.conn3 = sqlite3.connect('V2.db')
@@ -752,6 +760,8 @@ class Favorits(object):
         self.c3.execute("SELECT * FROM fav")
         for w in self.c3.fetchall():
             self.fav_list.append(w)
+        stop_fav=time.process_time()
+        print('Fav time: %f'%(stop_fav-start_fav))
 
     def add_(self):
 
@@ -777,60 +787,68 @@ class Favorits(object):
 
 
 class Eesti(object):
-    def __init__(self, word_):
-        self.word_ = word_
+    def __init__(self, graph_):
+        start_eesti=time.process_time()
+        self.graph_ = graph_
 
-        self.conn_eesti = sqlite3.connect(':memory:')
+        self.conn_eesti = sqlite3.connect('Eesti_base.db')
         self.c_eesti = self.conn_eesti.cursor()
-        self.c_eesti.execute("CREATE TABLE eesti_words(index_,est_,eng_,ex_)")
-        wordDoc = Document('Vocabulario_Eesti.docx')
-        idx = 0
-        for table in wordDoc.tables:
-            for row in table.rows:
-                list_ = []
 
-                for cell in row.cells:
-                    temp_ = ''
-                    for ch in cell.text:
-                        if ord(ch) in range(65535):
-                            temp_ = temp_ + ch
-                    try:
-                        list_.append(temp_)
-                    except:
-                        None
-                if len(list_) == 3:
-                    self.c_eesti.execute("INSERT INTO eesti_words VALUES (?,?,?,?)", (idx, list_[0], list_[1], list_[2]))
-                    idx += 1
-                elif len(list_) == 2:
-                    self.c_eesti.execute("INSERT INTO eesti_words VALUES (?,?,?,?)", (idx, list_[0], list_[1], 'None'))
-                    idx += 1
-                self.conn_eesti.commit()
+        def to_turn_off():
+            self.c_eesti.execute("CREATE TABLE eesti_words(index_,est_,eng_,ex_)")
+            wordDoc = Document('Vocabulario_Eesti.docx')
+            idx = 0
+            for table in wordDoc.tables:
+                for row in table.rows:
+                    list_ = []
+
+                    for cell in row.cells:
+                        temp_ = ''
+                        for ch in cell.text:
+                            if ord(ch) in range(65535):
+                                temp_ = temp_ + ch
+                        try:
+                            list_.append(temp_)
+                        except:
+                            None
+                    if len(list_) == 3:
+                        self.c_eesti.execute("INSERT INTO eesti_words VALUES (?,?,?,?)", (idx, list_[0], list_[1], list_[2]))
+                        idx += 1
+                    elif len(list_) == 2:
+                        self.c_eesti.execute("INSERT INTO eesti_words VALUES (?,?,?,?)", (idx, list_[0], list_[1], 'None'))
+                        idx += 1
+                    self.conn_eesti.commit()
+        #to_turn_off() #first delete Eesti_base.db
+
+        stop_eesti=time.process_time()
+        print('Eesti time: %f'%(stop_eesti- start_eesti))
 
     def getEestiWord(self):
         self.c_eesti.execute("SELECT Count(*) FROM eesti_words")
         eesti_lim = self.c_eesti.fetchall()
         print('eesti limit: ', eesti_lim)
         rnd = random.randint(1, eesti_lim[0][0])
-        self.word_.graph_.text_rus.delete('1.0', 'end')
-        self.word_.graph_.text_esp.delete('1.0', 'end')
-        self.word_.graph_.text_eng.delete('1.0', 'end')
+        self.graph_.text_rus.delete('1.0', 'end')
+        self.graph_.text_esp.delete('1.0', 'end')
+        self.graph_.text_eng.delete('1.0', 'end')
         self.c_eesti.execute("SELECT * FROM eesti_words WHERE rowid=%d" % rnd)
         f = (self.c_eesti.fetchone())
-        self.word_.graph_.text_rus.insert('1.0', f[1])
-        self.word_.graph_.text_eng.insert('1.0', f[2])
-        self.word_.graph_.text_esp.insert('1.0', f[3])
+        self.graph_.text_rus.insert('1.0', f[1])
+        self.graph_.text_eng.insert('1.0', f[2])
+        self.graph_.text_esp.insert('1.0', f[3])
         #self.word_.bg_colour()
 
 
 class W0rd(object):
     def __init__(self, graph_):
+        start_Word=time.process_time()
         self.rnd_for_continue = 0
         self.ind_backwards = -1
         self.rnd_fav = 0
         self.f_0_to_remove = []
         self.graph_ = graph_
         self.total_count = []
-        self.eesti_ = Eesti(self)
+        #self.eesti_ = Eesti(self)
         self.conn = sqlite3.connect(r'V1.db')
         self.conn_frases = sqlite3.connect(':memory:')
 
@@ -858,6 +876,8 @@ class W0rd(object):
                 self.search_list_rus.append(w[1])
                 self.search_list_eng.append(w[2])
                 self.search_list_esp.append('None')
+        stop_Word=time.process_time()
+        print('Word time: %f'%(stop_Word- start_Word))
 
 
     # def bg_colour(self):
@@ -902,7 +922,7 @@ class W0rd(object):
             #self.bg_colour()
 
         elif (self.graph_. eesti_sel .get()) == 'True':
-            self.eesti_.getEestiWord()
+            self.graph_.eesti_.getEestiWord()
 
         elif (self.graph_.fav_sel.get()) == 'True':
 
