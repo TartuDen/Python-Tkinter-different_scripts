@@ -123,10 +123,12 @@ class Translate_selected(object):
             self.graph_.text_eng.insert('end', '\n%s' % transl_from_rus_eng.text)
 
     def method_eng_esp_and_meaning_esp(self):
-        print('here')
         try:
             selected = self.graph_.text_eng.get(SEL_FIRST, SEL_LAST)
             transl_from_eng_ee = self.translator.translate(selected, dest='ee')
+            if transl_from_eng_ee==None:
+                transl_from_eng_ee = self.vocab.translate(selected, dest='ee')
+
             self.graph_.text_rus.insert('end', '\n%s\n' % ('-' * 15))
             self.graph_.text_rus.insert('end', '%s\n' % ('Eesti:'))
             self.graph_.text_rus.insert('end', '%s  -  %s' % (selected, transl_from_eng_ee.text))
@@ -138,10 +140,14 @@ class Translate_selected(object):
         except:
             pass
 
-        transl_from_eng_esp = self.translator.translate(selected, dest='es')
+        try:
+
+            transl_from_eng_esp = self.translator.translate(selected, dest='es')
+        except:
+            transl_from_eng_esp=('doesnt work yet')
 
         is_None = self.graph_.text_esp.get('1.0', 'end')
-        if transl_from_eng_esp.text not in self.graph_.text_esp.get('1.0', 'end') and transl_from_eng_esp.text not in (self.graph_.text_esp.get('1.0', 'end').title()):
+        if transl_from_eng_esp!='doesnt work yet' and transl_from_eng_esp.text not in self.graph_.text_esp.get('1.0', 'end') and transl_from_eng_esp.text not in (self.graph_.text_esp.get('1.0', 'end').title()):
             if 'None' in is_None or len(is_None)<2:
                 self.graph_.text_esp.delete('1.0', 'end')
                 self.graph_.text_esp.insert('end', '%s - %s' % (selected, transl_from_eng_esp.text))
