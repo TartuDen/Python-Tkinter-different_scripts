@@ -3,18 +3,25 @@ from tkinter import ttk
 
 
 class Size(object):
-    def __init__(self):
-        self.wx = 300
-        self.wy = 400
-        self.text_x = 60
-        self.text_y = 20
 
-        self.f_x = self.wx - 1
-        self.f_y = 400 - self.wy / 4
+    """
+    Class to store the size and position of the graphical elements.
+    """
+    def __init__(self):
+        self.wx = 300  # width of the window
+        self.wy = 400  # height of the window
+        self.text_x = 60  # width of the text widget
+        self.text_y = 20  # height of the text widget
+        self.f_x = self.wx - 1  # width of the frame
+        self.f_y = 400 - self.wy / 4  # height of the frame
+
 
 
 class Graf(Size):
     def __init__(self, master, size):
+        """
+        Class to create the graphical interface.
+        """
         self.master = master
         self.size = size
         self.master.geometry('%dx%d+400+200' % (self.size.wx, self.size.wy))
@@ -49,7 +56,7 @@ class Graf(Size):
         def screen(event):
             self.text.insert(INSERT, '%s' % event)
             self.result = (self.text.get('1.0', 'end'))
-            if self.result == '2+2\n':
+            if self.result == '2+2\n': # This is a joke :)
                 self.result = '22'
 
         self.buttons_name['1'].bind('<1>', lambda e: screen(1))
@@ -86,11 +93,6 @@ class Graf(Size):
         self.clear_b.grid(row=5, column=0, padx=6, pady=3)
 
 
-# class Calcs(object):
-#     def __init__(self,graf):
-#         self.graf=graf
-#         self.result=eval(self.graf.text.get('1.0','end'))
-#         print(self.result)
 
 
 def main():
