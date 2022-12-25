@@ -17,6 +17,9 @@ print
 
 
 def deck():
+    """
+    Returns a list of strings representing a deck of playing cards, in the format 'suit # rank'
+    """
     stack = []
     for i in ['Clubs # ', 'Diam. # ', 'Hearts # ', 'Spades # ']:
         for j in ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']:
@@ -26,6 +29,9 @@ def deck():
 
 
 def player_pass_button(value):
+    """
+    Sets the global variable player_pass to True if value is 'True', otherwise does nothing.
+    """
     global player_pass
     global turn
     if value == 'True':
@@ -33,19 +39,25 @@ def player_pass_button(value):
 
 
 def bank_face(master, bank_stack):
+    """
+    Updates the labels and images for the bank's cards, using the given master and bank_stack.
+    """
     global labels_bank
     global logos_bank
     logos_bank = []
     for i in range(len(bank_stack)):
         #labels_bank.append(Label(master, text='Face \ndown!', font=('Arial', 14)))
         #labels_bank[i].place(relx=(2 + i) / 10, rely=0.05, width=130, height=180)
-        logos_bank.append(PhotoImage(file=r'D:\PROJECTS\Sublime Text 3\cards\%s.gif' % bank_stack[i]).subsample(1, 1))
+        logos_bank.append(PhotoImage(file=r'D:/PROJECTS/Sublime Text 3/cards/%s.gif' % bank_stack[i]).subsample(1, 1))
         labels_bank[i].config(image=logos_bank[i])
 
     #Label(master, text=(edit[0] + '\n' * 3 + edit[1]), font=('Arial', 14)).place(relx=(2 + i) / 10, rely=0.05, width=70, height=150)
 
 
 def game_over(master, player_win, bank_win, player_score, bank_score):
+    """
+    Displays a message indicating the winner of the game on the given master, based on the given player_win and bank_win booleans and player_score and bank_score integers.
+    """
     if player_score > bank_score or player_win == True:
         Label(master, text='YOU WIN!', font=('Arial', 18)).place(relx=0.3, rely=0.4, width=400, height=100)
     elif bank_score > player_score or bank_win == True:
@@ -53,10 +65,16 @@ def game_over(master, player_win, bank_win, player_score, bank_score):
 
 
 def new_game(master):
+    """
+    Begins a new game on the given master.
+    """
     pass
 
 
 def play(master, stack):
+    """
+    Begins a game of Blackjack on the given master, using the given stack of cards.
+    """
     global player_pass
     global labels_player
     global logos_player
@@ -88,7 +106,7 @@ def play(master, stack):
         if turn % 2 != 0:
             button_play.wait_variable(waiting)
             if player_pass == False:
-                # Player_____________________________________________________________________________________
+
 
                 label_player = Label(master, text='player')
                 label_player.place(relx=0.88, rely=0.7, width=70, height=150)
@@ -125,7 +143,7 @@ def play(master, stack):
         elif turn % 2 == 0:
             if player_pass == True:
                 button_play.config(text='Banks Turn')
-            # Bank_____________________________________________________________________________________________
+
             label_bank = Label(master, text='bank')
             label_bank.place(relx=0.88, rely=0.05, width=70, height=150)
 
