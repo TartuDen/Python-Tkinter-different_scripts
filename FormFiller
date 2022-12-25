@@ -9,6 +9,15 @@ pg.FAILSAFE = True
 
 class Filling_form(object):
     def __init__(self, name, info_):
+        """
+        Initialize the FillingForm instance with the given name and info.
+        
+        Opens the form website in the default web browser and expands the form if necessary.
+        
+        Parameters:
+            name (str): The name to be entered into the form.
+            info (list): A list of strings containing the information to be entered into the form.
+        """
         self.name = name
         self.info_ = info_
 
@@ -20,13 +29,16 @@ class Filling_form(object):
         if pos:
             cent = pg.center(pos)
             pg.click(cent)
-        self.Generic()
+        self.generic()
 
-    def Generic(self):
+    def generic(self):
+        """
+        Scroll through the form until the 'name' field is found.
+        """
         time.sleep(0.2)
 
         for i in range(1, 4):
-            pos = pg.locateOnScreen('C:/C/pyautogui/GenericForm.png')
+            pos = pg.locateOnScreen('C:/C/pyautogui/genericForm.png')
             if pos:
                 break
             else:
@@ -34,12 +46,15 @@ class Filling_form(object):
                     pg.scroll(-1000)
                 else:
                     pg.scroll(1000)
-        self.Name()
+        self.name()
 
-    def Name(self):
+    def name(self):
+        """
+        Scroll through the form until the 'name' field is found and enter the name into the field.
+        """
         time.sleep(0.2)
         for i in range(1, 4):
-            pos = pg.locateOnScreen('C:/C/pyautogui/Name.png')
+            pos = pg.locateOnScreen('C:/C/pyautogui/name.png')
             if pos:
                 cent = pg.center(pos)
                 pg.moveTo(cent, duration=0.2)
@@ -51,12 +66,15 @@ class Filling_form(object):
                     pg.scroll(i * (-1000))
                 else:
                     pg.scroll(i * 1000)
-        self.Fear()
+        self.fear()
 
-    def Fear(self):
+    def fear(self):
+        """
+        Scroll through the form until the 'fear' field is found and enter the fear into the field.
+        """
         time.sleep(0.2)
         for i in range(1, 4):
-            pos = pg.locateOnScreen('C:/C/pyautogui/Fear.png')
+            pos = pg.locateOnScreen('C:/C/pyautogui/fear.png')
             if pos:
                 cent = pg.center(pos)
                 pg.moveTo(cent, duration=0.2)
@@ -71,6 +89,9 @@ class Filling_form(object):
         self.select_m()
 
     def select_m(self):
+        """
+        Scroll through the form until the 'Power' field is found and select a random value for the field.
+        """
         rnd = random.choice(['True', 'True', 'False'])
         rnd_height = random.randint(40, 80)
         if rnd == 'True':
@@ -89,6 +110,9 @@ class Filling_form(object):
         self.radioB()
 
     def radioB(self):
+        """
+        Scroll through the form until the 'Radio Button' field is found and select a random value for the field.
+        """
         time.sleep(0.2)
         rnd_pos = random.randrange(-50, 50, 5)
         for i in range(1, 4):
@@ -101,6 +125,9 @@ class Filling_form(object):
         self.additComment()
 
     def additComment(self):
+        """
+        Scroll through the form until the 'Additional Comments' field is found and enter the comments into the field.
+        """
         time.sleep(0.2)
         for i in range(1, 4):
             pos = pg.locateOnScreen('C:/C/pyautogui/additComment.png')
@@ -114,12 +141,15 @@ class Filling_form(object):
                     pg.scroll(i * (-1000))
                 else:
                     pg.scroll(i * (1000))
-        self.enviar()
+        self.submit()
 
-    def enviar(self):
+    def submit(self):
+        """
+        Scroll through the form until the 'Submit' button is found and click it to submit the form.
+        """
         time.sleep(0.2)
         for i in range(1, 4):
-            pos = pg.locateOnScreen('C:/C/pyautogui/enviar.png')
+            pos = pg.locateOnScreen('C:/C/pyautogui/submit.png')
             if pos:
                 cent = pg.center(pos)
                 pg.moveTo(cent)
@@ -156,7 +186,7 @@ class Filling_form(object):
                 time.sleep(0.2)
                 pg.moveTo(x, y + rnd_height, duration=0.2)
                 pg.click(x, y + rnd_height)
-                self.enviar()
+                self.submit()
 
     def toClose(self):
         print('toClose')
@@ -178,4 +208,3 @@ def main():
 
 
 main()
-
